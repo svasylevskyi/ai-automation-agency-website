@@ -1,0 +1,79 @@
+name: Deploy website to Hetzner
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: agency-production
+  cancel-in-progress: false
+jobs:
+  verify-branch:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Allow manual deployments from main only
+        env:
+          DEPLOY_REF: ${{ github.ref }}
+        run: test "$DEPLOY_REF" = refs/heads/main
+  build:
+    needs: verify-branch
+    uses: ./.github/workflows/ci.yml
+    with:
+      package_release: true
+  deploy:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment: production
+    env:
+      DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+      DEPLOY_PORT: ${{ vars.DEPLOY_PORT || '22' }}
+      SITE_URL: ${{ vars.SITE_URL }}
+      RELEASE_ID: ${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: agency-release
+          path: release
+      - name: Validate destination
+        shell: bash
+        run: |
+          [[ "$DEPLOY_HOST" =~ ^[A-Za-z0-9][A-Za-z0-9.-]*$ ]]
+          [[ "$DEPLOY_PORT" =~ ^[0-9]{1,5}$ ]]
+          (( 10#$DEPLOY_PORT >= 1 && 10#$DEPLOY_PORT <= 65535 ))
+          [[ "$SITE_URL" =~ ^https://[A-Za-z0-9][A-Za-z0-9.-]*$ ]]
+          [[ "$RELEASE_ID" =~ ^[a-f0-9]{40}-[0-9]+-[0-9]+$ ]]
+      - name: Configure SSH with a verified host key
+        shell: bash
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          test -n "$SSH_PRIVATE_KEY"
+          test -n "$SSH_KNOWN_HOSTS"
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$SSH_PRIVATE_KEY" > "$HOME/.ssh/id_ed25519"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/id_ed25519" "$HOME/.ssh/known_hosts"
+      - name: Transfer and activate tested release
+        shell: bash
+        run: |
+          checksum=$(sha256sum release/agency-release.tar.gz)
+          checksum=${checksum%% *}
+          options=(-o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=15 -o ServerAliveInterval=15 -o ServerAliveCountMax=4)
+          scp "${options[@]}" -P "$DEPLOY_PORT" release/agency-release.tar.gz "agency-deploy@$DEPLOY_HOST:/srv/agency/incoming/$RELEASE_ID.tar.gz"
+          ssh "${options[@]}" -p "$DEPLOY_PORT" "agency-deploy@$DEPLOY_HOST" "/usr/local/sbin/agency-deploy '$RELEASE_ID' '$checksum'"
+      - name: Verify public HTTPS and exact release
+        shell: bash
+        run: |
+          for attempt in {1..12}; do
+            if curl --silent --show-error --fail --max-time 10 "$SITE_URL/api/health" | python3 -c 'import json,os,sys; d=json.load(sys.stdin); sys.exit(0 if d.get("status")=="ok" and d.get("release")==os.environ["RELEASE_ID"] else 1)' 2>/dev/null; then
+              printf 'Deployed `%s` to %s\n' "$RELEASE_ID" "$SITE_URL" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo 'Public verification failed. The server may be running; inspect DNS, HTTPS and Caddy. No database rollback has been performed.' >&2
+          exit 1
+      - name: Remove SSH credentials
+        if: always()
+        run: rm -f "$HOME/.ssh/id_ed25519" "$HOME/.ssh/known_hosts"

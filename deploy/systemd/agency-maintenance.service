@@ -1,0 +1,16 @@
+[Unit]
+Description=Retry agency notifications and clean expired sessions
+After=postgresql.service
+ConditionPathExists=/srv/agency/current/package.json
+
+[Service]
+Type=oneshot
+User=agency
+Group=agency
+WorkingDirectory=/srv/agency/current
+EnvironmentFile=/etc/agency/site.env
+ExecStart=/usr/local/bin/node --import tsx scripts/maintenance.ts
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict

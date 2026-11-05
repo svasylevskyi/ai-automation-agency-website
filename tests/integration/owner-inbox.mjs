@@ -46,6 +46,27 @@ async function signIn(pwd = password) {
   return response;
 }
 try {
+  const health = await call("/api/health");
+  status(health, 200);
+  assert.equal(health.headers.get("cache-control"), "no-store");
+  assert.deepEqual(await health.json(), {
+    status: "ok",
+    release: process.env.RELEASE_ID || "development",
+  });
+  checks += 2;
+  await db().query(
+    "ALTER TABLE site_settings RENAME TO integration_site_settings",
+  );
+  try {
+    const unavailable = await call("/api/health");
+    status(unavailable, 503);
+    assert.deepEqual(await unavailable.json(), { status: "unavailable" });
+    checks++;
+  } finally {
+    await db().query(
+      "ALTER TABLE integration_site_settings RENAME TO site_settings",
+    );
+  }
   await db().query("DELETE FROM site_owner");
   await db().query('DELETE FROM "user"');
   await db().query("DELETE FROM enquiries");

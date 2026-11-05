@@ -1,0 +1,7 @@
+# Replace the hostname. DNS must point to this server before certificate issuance.
+agency.example.com {
+    encode zstd gzip
+    reverse_proxy 127.0.0.1:3000 {
+        header_up X-Agency-Client-IP {remote_host}
+    }
+}

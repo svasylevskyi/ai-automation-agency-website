@@ -61,8 +61,10 @@ Open **Owner area → Settings** to update the agency name, tagline, search/shar
 - `compose.yaml`: Local PostgreSQL and Mailpit only.
 - `docs/`: Local setup, architecture, scope and historical design decisions.
 
-## Deployment boundary
+## Deploy to Hetzner
 
-Nothing is deployed by this increment. The previous `out/` static-hosting instructions are superseded. Production needs the Next.js server, PostgreSQL, HTTPS, a configured SMTP provider, backups and scheduled maintenance. `compose.yaml` uses local-only development credentials and must not be used unchanged as a production deployment. Keep `INDEX_SITE=false` until the domain, public contact information and privacy notice are ready.
+Follow the **[guided Hetzner setup](docs/hetzner-setup.md)** for a dedicated Ubuntu server running Node 24, PostgreSQL 17 and Caddy, without Docker. The manual **Deploy website to Hetzner** GitHub workflow tests/builds on GitHub, uploads a checked release, backs up the database, applies migrations and verifies the restarted website. Production secrets stay on the server. Nothing is deployed until the server is configured and you run the workflow from `main`.
+
+The guide covers SSH keys, GitHub variables/secrets, HTTPS, the first owner account, scheduled maintenance, backup restore drills and recovery. Local backups and releases are retained; configure off-server backup storage before accepting important enquiries. The previous `out/` static-hosting instructions are superseded. `compose.yaml` uses local-only development credentials and must not be used unchanged as a production deployment. Keep `INDEX_SITE=false` until the domain, public contact information and privacy notice are ready.
 
 See [owner inbox implementation](docs/owner-inbox.md) for security controls, tests and deployment follow-ups. The [original Orbit implementation](docs/orbit-implementation.md) and [hosting comparison](docs/hosting-and-rollout.md) describe earlier decisions, not the current runtime.
