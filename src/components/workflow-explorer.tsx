@@ -15,7 +15,6 @@ export function WorkflowExplorer() {
     >
       <div className="wrap example-layout">
         <div className="example-copy">
-          <div className="eyebrow">02 / See the possibility</div>
           <h2 id="example-title">
             Small changes.
             <br />A clearer working day.

@@ -18,7 +18,7 @@ The website has moved from static export to a Next.js Node server with PostgreSQ
 ## Security boundaries
 
 - Owner provisioning and password resets run only through a trusted terminal, with a masked password prompt. Reset revokes sessions.
-- The auth HTTP wrapper exposes only sign-in, sign-out and session retrieval. Sign-up and other auth routes return 404.
+- The public auth HTTP wrapper exposes only sign-in, sign-out and session retrieval. Sign-up and other auth routes return 404. The separate owner-only password endpoint validates the current/new/confirmed passwords, applies per-owner throttling, and delegates password verification, hashing and session rotation to Better Auth. Other sessions are always revoked.
 - Mutations require the exact configured Origin. Authentication and uploads have persistent limits; sessions use HTTP-only SameSite cookies, Secure when the origin is HTTPS, with a 12-hour lifetime.
 - Runtime config rejects non-HTTPS public origins. Localhost HTTP is supported for Windows review.
 - Raw database/SMTP errors and submitted private content are not returned in API errors or logged by application error handlers.

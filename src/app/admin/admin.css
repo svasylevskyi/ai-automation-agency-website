@@ -319,3 +319,11 @@
 .admin-header nav a {
   gap: 6px;
 }
+
+.login-form > .button,
+.password-form > .button {
+  margin-top: 24px;
+}
+.password-form {
+  max-width: 620px;
+}
