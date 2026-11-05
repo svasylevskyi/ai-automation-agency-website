@@ -20,6 +20,7 @@ export default async function ProtectedLayout({
         <nav aria-label="Owner navigation">
           <Link href="/admin">Enquiries</Link>
           <Link href="/admin/settings">Settings</Link>
+          <Link href="/admin/account">Account</Link>
           <a href="/">
             View website <Arrow />
           </a>

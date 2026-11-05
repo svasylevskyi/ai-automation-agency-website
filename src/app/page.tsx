@@ -24,7 +24,6 @@ export default async function Home() {
           <div className="wrap">
             <div className="hero-layout">
               <div className="hero-copy">
-                <div className="eyebrow">{brand.tagline}</div>
                 <h1 id="hero-title">
                   A little less busy.
                   <br />
@@ -134,7 +133,6 @@ export default async function Home() {
           <div className="wrap">
             <div className="section-heading">
               <div>
-                <div className="eyebrow">01 / What we can simplify</div>
                 <h2 id="solutions-title">
                   Better flow.
                   <br />
@@ -315,7 +313,6 @@ export default async function Home() {
           <div className="wrap">
             <div className="section-heading">
               <div>
-                <div className="eyebrow">03 / How we work together</div>
                 <h2 id="approach-title">
                   Start focused.
                   <br />
@@ -367,7 +364,6 @@ export default async function Home() {
             </div>
             <aside className="enterprise" aria-labelledby="enterprise-title">
               <div>
-                <div className="eyebrow">For larger organisations</div>
                 <h3 id="enterprise-title">
                   Start with a department.
                   <br />
@@ -396,7 +392,6 @@ export default async function Home() {
         >
           <div className="wrap faq-layout">
             <div className="faq-intro">
-              <div className="eyebrow">04 / A little more clarity</div>
               <h2 id="questions-title">
                 Good questions.
                 <br />
@@ -459,7 +454,6 @@ export default async function Home() {
         >
           <div className="wrap contact-layout">
             <div className="contact-copy">
-              <div className="eyebrow">05 / Your next useful step</div>
               <h2 id="contact-title">
                 What would you
                 <br />

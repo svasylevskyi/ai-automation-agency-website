@@ -295,13 +295,105 @@ try {
     .getSetCookie()
     .map((c) => c.split(";")[0])
     .join("; ");
+  const nextPassword = randomBytes(30).toString("base64url");
+  const passwordInput = {
+    currentPassword: password,
+    newPassword: nextPassword,
+    confirmPassword: nextPassword,
+  };
+  status(await call("/api/admin/password", "POST", passwordInput), 401);
+  status(
+    await call(
+      "/api/admin/password",
+      "POST",
+      passwordInput,
+      true,
+      "https://attacker.test",
+    ),
+    403,
+  );
+  status(
+    await call(
+      "/api/admin/password",
+      "POST",
+      { ...passwordInput, confirmPassword: "does-not-match" },
+      true,
+    ),
+    400,
+  );
+  status(
+    await call(
+      "/api/admin/password",
+      "POST",
+      { ...passwordInput, newPassword: "short", confirmPassword: "short" },
+      true,
+    ),
+    400,
+  );
+  status(
+    await call(
+      "/api/admin/password",
+      "POST",
+      { ...passwordInput, currentPassword: "incorrect-current-password" },
+      true,
+    ),
+    400,
+  );
+  const otherCookie = cookie;
+  // Avoid the auth library's short sign-in burst limit while exercising two browsers.
+  await db().query('DELETE FROM "rateLimit"');
+  const anotherLogin = await signIn();
+  status(anotherLogin, 200);
+  cookie = anotherLogin.headers
+    .getSetCookie()
+    .map((c) => c.split(";")[0])
+    .join("; ");
+  const previousCookie = cookie;
+  const changed = await call(
+    "/api/admin/password",
+    "POST",
+    { ...passwordInput, revokeOtherSessions: false },
+    true,
+  );
+  status(changed, 200);
+  assert.equal((await changed.json()).token, undefined);
+  checks++;
+  cookie = changed.headers
+    .getSetCookie()
+    .map((c) => c.split(";")[0])
+    .join("; ");
+  assert(cookie);
+  checks++;
+  const rotatedCookie = cookie;
+  status(await call("/admin/account", "GET", undefined, true), 200);
+  cookie = otherCookie;
+  status(await call("/api/admin/password", "POST", passwordInput, true), 401);
+  cookie = previousCookie;
+  status(await call("/api/admin/settings", "PUT", newSettings, true), 401);
+  cookie = rotatedCookie;
+  await db().query('DELETE FROM "rateLimit"');
+  status(await signIn(password), 401);
+  status(await signIn(nextPassword), 200);
+  // Password changes are throttled per owner even when IP headers change.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    status(
+      await call(
+        "/api/admin/password",
+        "POST",
+        { ...passwordInput, currentPassword: "incorrect-current-password" },
+        true,
+      ),
+      400,
+    );
+  }
+  status(await call("/api/admin/password", "POST", passwordInput, true), 429);
   await provisionOwner(email, randomBytes(30).toString("base64url"), true);
   status(await call("/api/admin/settings", "PUT", newSettings, true), 401);
   await db().query("UPDATE site_settings SET data=$1,version=version+1", [
     JSON.stringify(saved.data),
   ]);
   console.log(
-    `Passed ${checks} integration assertions: auth, ownership, enquiries, persistence, mail recovery, settings, logos, conflicts, deletion, rate limiting and session revocation.`,
+    `Passed ${checks} integration assertions: auth, ownership, enquiries, persistence, mail recovery, settings, logos, conflicts, deletion, rate limiting, password changes and session revocation.`,
   );
 } finally {
   await db().end();

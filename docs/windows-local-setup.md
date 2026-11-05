@@ -122,7 +122,9 @@ Open the same localhost URLs. The build no longer creates a standalone static we
 
 ## Password recovery and notifications
 
-To reset the existing owner's password, use the same owner email:
+If you know your current password, open **Admin → Account** to change it. Other sessions are signed out.
+
+If you have forgotten it, reset the existing owner's password from your terminal using the same owner email:
 
 ```powershell
 npm run owner:create -- --reset-password

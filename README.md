@@ -42,7 +42,7 @@ Mailpit captures outgoing emails locally; nothing is sent to a real email addres
 | `npm run owner:create -- --reset-password` | Reset the existing owner's password using the same email; invalidate all sessions             |
 | `npm run maintenance`                      | Retry up to 100 pending/failed/stale notifications and remove expired request limits/sessions |
 
-The admin area has no public registration, invitation or email password-reset endpoint. Password recovery requires local/server terminal access. Notification delivery is attempted after saving each enquiry; the inbox shows delivery state and provides a retry action. Run maintenance periodically in a future deployment. SMTP delivery is at least once: an interrupted send can result in a duplicate notification, but not a lost enquiry.
+Use **Owner area → Account** to change your password with the current password. Other sessions are revoked; the current session is rotated. The admin area has no public registration, invitation or email password-reset endpoint. Forgotten-password recovery requires local/server terminal access. Notification delivery is attempted after saving each enquiry; the inbox shows delivery state and provides a retry action. Run maintenance periodically in a future deployment. SMTP delivery is at least once: an interrupted send can result in a duplicate notification, but not a lost enquiry.
 
 ## Branding and settings
 

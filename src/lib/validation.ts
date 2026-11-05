@@ -57,3 +57,18 @@ export const enquiryUpdateSchema = z.object({
   notes: z.string().max(10000),
   version: z.number().int().min(1),
 });
+
+export const passwordChangeSchema = z
+  .object({
+    currentPassword: z.string().min(1).max(128),
+    newPassword: z.string().min(12).max(128),
+    confirmPassword: z.string().min(1).max(128),
+  })
+  .refine((value) => value.newPassword === value.confirmPassword, {
+    message: "The new passwords must match.",
+    path: ["confirmPassword"],
+  })
+  .refine((value) => value.newPassword !== value.currentPassword, {
+    message: "Choose a different password.",
+    path: ["newPassword"],
+  });
