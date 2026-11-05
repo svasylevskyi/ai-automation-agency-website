@@ -2,3 +2,10 @@
 drafts/_qa.html
 __pycache__/
 .DS_Store
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+.env*
+!.env.example
+public/_qa.html
