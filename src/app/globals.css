@@ -1270,3 +1270,129 @@
     transition: none !important;
   }
 }
+
+/* Live enquiry form shares Orbit's quiet, rounded surfaces. */
+.contact-forms {
+  min-width: 0;
+}
+.enquiry-card {
+  padding: clamp(24px, 4vw, 40px);
+  background: var(--surface, #fff);
+  border: 1px solid var(--line, #ded8ec);
+  border-radius: 28px;
+}
+.enquiry-card h3 {
+  margin: 0 0 12px;
+  font-size: 1.6rem;
+}
+.enquiry-card > p {
+  margin-bottom: 24px;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.field input,
+.field textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 13px 15px;
+  border: 1px solid #c5bcd7;
+  border-radius: 12px;
+  background: #fff;
+  color: #262037;
+  font: inherit;
+}
+.field textarea {
+  resize: vertical;
+}
+.field input[type="file"] {
+  white-space: normal;
+  padding: 12px;
+}
+.field small {
+  font-weight: 400;
+  font-size: 0.82rem;
+}
+.field-error {
+  color: #9c2445;
+}
+.field [aria-invalid="true"] {
+  border-color: #9c2445;
+}
+.check-field {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin: 20px 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  cursor: pointer;
+}
+.check-field input {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  margin-top: 2px;
+  accent-color: #6d4acb;
+}
+.honeypot {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.notice {
+  padding: 16px;
+  border-radius: 12px;
+  margin-top: 16px;
+  overflow-wrap: anywhere;
+}
+.notice.error {
+  background: #fbeef1;
+  color: #84273e;
+}
+.notice.success {
+  background: #e9f6ef;
+  color: #24583c;
+}
+.button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.planner-disclosure {
+  margin-top: 24px;
+  border-top: 1px solid #dcd4eb;
+  padding-top: 20px;
+}
+.planner-disclosure > summary {
+  cursor: pointer;
+  font-weight: 600;
+  padding: 12px 0;
+}
+.planner-disclosure .planner {
+  margin-top: 20px;
+}
+.privacy-note a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 520px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+button.text-link {
+  border: 0;
+  background: none;
+  padding: 8px 0;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}

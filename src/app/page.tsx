@@ -1,16 +1,19 @@
-import { brand } from "@/config/brand";
+import { getBrand } from "@/server/settings";
+import { EnquiryForm } from "@/components/enquiry-form";
+export const dynamic = "force-dynamic";
 import { Brand } from "@/components/brand";
 import { SiteHeader } from "@/components/site-header";
 import { WorkflowExplorer } from "@/components/workflow-explorer";
 import { Planner } from "@/components/planner";
 
-export default function Home() {
+export default async function Home() {
+  const brand = await getBrand();
   return (
     <>
       <a className="skip" href="#main">
         Skip to content
       </a>
-      <SiteHeader />
+      <SiteHeader brand={brand} />
       <main id="main" tabIndex={-1}>
         <section
           className="hero"
@@ -476,14 +479,20 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <Planner />
+            <div className="contact-forms">
+              <EnquiryForm brand={brand} />
+              <details className="planner-disclosure">
+                <summary>Just exploring? Try the quick planning guide.</summary>
+                <Planner brand={brand} />
+              </details>
+            </div>
           </div>
         </section>
       </main>
       <footer className="site-footer">
         <div className="wrap footer-inner">
           <div>
-            <Brand footer />
+            <Brand brand={brand} footer />
             <p>Practical AI automation. Built around your business.</p>
           </div>
           <p>

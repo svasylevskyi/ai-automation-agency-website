@@ -1,75 +1,68 @@
 # AI Automation Agency — Orbit website
 
-The selected Orbit direction is now a responsive Next.js/TypeScript website. It retains the lavender palette, orbital illustration, single-page sections and compact sticky navigation. **Automation Studio and the mark are provisional.**
+A responsive, founder-led agency website built with Next.js, TypeScript and Tailwind. Orbit remains the visual direction; the name and logo are editable placeholders. All five reference concepts remain unchanged in [`drafts/`](drafts/index.html).
 
-All five original concepts remain unchanged in [`drafts/`](drafts/index.html). They are reference files, not public production routes.
+The website now includes live enquiry capture, PostgreSQL storage, owner email notifications, a protected owner inbox with notes/statuses, and editable branding/contact settings. It runs as a **Node server**, not a static export.
 
-## Run and build
+## Run locally on Windows
 
-Use Node 24 LTS (see `.nvmrc`; minimum 22.18) and npm:
+Full instructions and troubleshooting: **[Windows local setup](docs/windows-local-setup.md)**.
 
-```sh
+Install Node.js **24 LTS**, Git for Windows, and Docker Desktop with the WSL 2 backend and Linux containers. Start Docker Desktop, then in PowerShell:
+
+```powershell
+git clone https://github.com/svasylevskyi/ai-automation-agency-website.git
+cd ai-automation-agency-website
+git switch feat/owner-inbox
 npm ci
+npm run setup:local
+docker compose up -d
+npm run db:migrate
+npm run owner:create
 npm run dev
 ```
 
-Open `http://localhost:3000`. For validation and a portable static build:
+Use `main` instead of the feature branch after the PR is merged. `owner:create` prompts for your email and a password (minimum 12 characters); there are no default owner credentials.
 
-```sh
-npm run check
-```
+- Website: http://localhost:3000
+- Owner area: http://localhost:3000/admin
+- Local notification inbox: http://localhost:8025
 
-This runs TypeScript, planner unit tests and the production build. `npm run build` exports HTML/CSS/JS to `out/`; there is no runtime Node server or database yet. To review that exact build locally:
+Mailpit captures outgoing emails locally; nothing is sent to a real email address. PostgreSQL data is retained in a Docker volume. `.env.local` is ignored by Git and generated with a unique auth secret. Re-running `setup:local` leaves an existing file untouched.
 
-```sh
-python3 -m http.server 8000 --directory out
-```
+## Commands
 
-## Change the name and logo
+| Command                                    | Purpose                                                                                       |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| `npm run dev`                              | Development server, localhost only                                                            |
+| `npm run build` / `npm start`              | Build and run the production server locally                                                   |
+| `npm run check`                            | TypeScript, unit/security tests and production build                                          |
+| `npm run db:migrate`                       | Apply auth schema and checked, versioned application migrations; preserve existing data       |
+| `npm run owner:create`                     | Create the single owner interactively                                                         |
+| `npm run owner:create -- --reset-password` | Reset the existing owner's password using the same email; invalidate all sessions             |
+| `npm run maintenance`                      | Retry up to 100 pending/failed/stale notifications and remove expired request limits/sessions |
 
-Edit [`src/config/brand.ts`](src/config/brand.ts):
+The admin area has no public registration, invitation or email password-reset endpoint. Password recovery requires local/server terminal access. Notification delivery is attempted after saving each enquiry; the inbox shows delivery state and provides a retry action. Run maintenance periodically in a future deployment. SMTP delivery is at least once: an interrupted send can result in a duplicate notification, but not a lost enquiry.
 
-- `name`: header/footer wordmark, accessible home links, document title and sharing metadata.
-- `logo.src`, `logo.width`, `logo.height`: replace the mark with an asset in `public/brand/`. Set dimensions to the asset's natural ratio.
-- `logo.showName`: set `false` if the supplied logo already contains the agency name.
-- `icon`: the favicon asset, which may differ from the main logo.
-- `description`, `tagline` and founder details: centrally managed copy.
-- `contactEmail` / `bookingUrl`: owner-approved public contact destinations; currently blank. A configured link appears after the planner recommendation.
-- `siteUrl`: the final HTTPS origin. Leave blank for review builds, which emit `noindex`. Set it only when the site is ready for public indexing.
+## Branding and settings
 
-Rebuild after changes. The shared Brand component supports wrapping names and rectangular marks. Anchor offsets adapt to header height. The decorative hero orbit is a workflow illustration, independent of the agency logo. Historic drafts intentionally retain their original working identity.
+Open **Owner area → Settings** to update the agency name, tagline, search/sharing description, logo, public email, booking URL and privacy notice URL. These changes apply on the next page load without a rebuild. Logos are limited to 2 MB PNG/JPEG/WebP, decoded and re-encoded as PNG, and stored in PostgreSQL; SVG uploads are rejected. Save settings after upload to publish the logo. A checkbox supports logos that already include the agency name.
 
-The Orbit colour tokens live at the top of `src/app/globals.css`. Tailwind v4 utilities are available; the approved composition uses readable component CSS without Tailwind's reset changing the draft layout.
-
-## What works now
-
-- Sticky header; native mobile menu disclosure, also usable without JavaScript.
-- Anchor navigation, current-section tracking, Escape/outside-click dismissal and close-on-navigation.
-- “Let’s talk” uses a background/border selected state. Underline markers apply only to ordinary menu links; the CTA retains a keyboard focus outline.
-- Three illustrative workflow examples, native FAQs and a browser-local assessment planner.
-- Skip link, reduced-motion support, labelled controls and server-rendered public content.
-- Central metadata and replaceable branding; no external fonts, images or analytics requests.
-
-The planner sends and stores no data. There is no enquiry submission, authentication, admin area, CRM integration or live deployment in this increment. Do not present the examples as client results.
+[`src/config/brand.ts`](src/config/brand.ts) supplies initial defaults and founder details. Once migrated, database settings are authoritative; editing those defaults will not overwrite saved settings. Original drafts retain their historical identity. The public email and server-side notification recipient are separate settings.
 
 ## Structure
 
-```text
-src/app/           Public page, layout, metadata and Orbit styles
-src/components/    Header, shared branding and interactive sections
-src/config/        Provisional brand and public contact configuration
-src/lib/           Workflow examples and recommendation logic
-public/brand/      Replaceable identity assets
-tests/             Planner checks
-out/               Generated static export (ignored)
-drafts/            All five original HTML design options (retained)
-docs/              Design history, implementation and hosting notes
-```
-
-See [Orbit implementation and verification](docs/orbit-implementation.md) and the earlier [hosting/Webflow comparison](docs/hosting-and-rollout.md). That comparison is historical research dated 5 November 2026; verify vendor terms before purchasing.
+- `src/app/`: Orbit public site, admin pages and API routes.
+- `src/components/`: Shared branding, navigation, enquiry/planning tools and owner forms.
+- `src/server/`: Database, auth, mail, rate limits, uploads and owner provisioning.
+- `src/lib/`: Shared validation and workflow recommendation logic.
+- `migrations/`, `scripts/`: Database lifecycle and local owner setup.
+- `tests/`: Unit/security tests and opt-in database/HTTP integration tests.
+- `compose.yaml`: Local PostgreSQL and Mailpit only.
+- `docs/`: Local setup, architecture, scope and historical design decisions.
 
 ## Deployment boundary
 
-Serve **only `out/`** on Hetzner with Caddy/nginx. Do not serve the repository root, which contains reference drafts and source. Build a release, upload it into a new directory, switch the web root/symlink after a smoke check, and retain the previous release for rollback. No server access, DNS changes or deployment credentials are configured here.
+Nothing is deployed by this increment. The previous `out/` static-hosting instructions are superseded. Production needs the Next.js server, PostgreSQL, HTTPS, a configured SMTP provider, backups and scheduled maintenance. `compose.yaml` uses local-only development credentials and must not be used unchanged as a production deployment. Keep `INDEX_SITE=false` until the domain, public contact information and privacy notice are ready.
 
-Next.js [static exports](https://nextjs.org/docs/app/guides/static-exports) remain portable across static web hosts. A future authenticated admin area with stored enquiries will need a backend: either switch this application to a server deployment or provide a separate service. That decision and implementation are deferred.
+See [owner inbox implementation](docs/owner-inbox.md) for security controls, tests and deployment follow-ups. The [original Orbit implementation](docs/orbit-implementation.md) and [hosting comparison](docs/hosting-and-rollout.md) describe earlier decisions, not the current runtime.
