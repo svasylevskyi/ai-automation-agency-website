@@ -1,47 +1,75 @@
-# AI Automation Agency — five website directions
+# AI Automation Agency — Orbit website
 
-Five complete, responsive HTML concepts for a founder-led automation agency serving small and medium-sized businesses, with a route to larger clients.
+The selected Orbit direction is now a responsive Next.js/TypeScript website. It retains the lavender palette, orbital illustration, single-page sections and compact sticky navigation. **Automation Studio and the mark are provisional.**
 
-## Review
+All five original concepts remain unchanged in [`drafts/`](drafts/index.html). They are reference files, not public production routes.
 
-Open [`drafts/index.html`](drafts/index.html) directly in a browser. Each concept is a self-contained HTML file with inline CSS/JavaScript, inline SVG and no external font, image, analytics or package dependencies.
+## Run and build
 
-Alternatively, from the repository root:
+Use Node 24 LTS (see `.nvmrc`; minimum 22.18) and npm:
 
 ```sh
-python3 -m http.server 8000 --directory drafts
+npm ci
+npm run dev
 ```
 
-Then open `http://localhost:8000`.
+Open `http://localhost:3000`. For validation and a portable static build:
 
-| Design | Direction | Particularly useful for |
-| --- | --- | --- |
-| [01 Signal](drafts/designs/01-signal.html) | Dark graphite, mint, orbital workflow | A visibly technical but approachable AI studio |
-| [02 Prism](drafts/designs/02-prism.html) | Pearl white, electric blue, translucent layers, editorial rows | Clarity and broad SMB appeal |
-| [03 Vector](drafts/designs/03-vector.html) | Graphite, acid lime, oversized typography, structural grids | A bold, distinct technology brand |
-| [04 Orbit](drafts/designs/04-orbit.html) | Soft lavender, rounded forms, centred hero, asymmetric service layout | An accessible first step into automation |
-| [05 Atlas](drafts/designs/05-atlas.html) | Warm stone, forest green, architectural panels | A premium advisory brand and larger-company conversations |
+```sh
+npm run check
+```
 
-## Included interactions
+This runs TypeScript, planner unit tests and the production build. `npm run build` exports HTML/CSS/JS to `out/`; there is no runtime Node server or database yet. To review that exact build locally:
 
-- Sticky 72 px desktop / 64 px mobile header.
-- Collapsible mobile navigation with ARIA state, Escape dismissal, outside-click dismissal and close-on-navigation.
-- Native anchor scrolling, active-section indication and heading offsets.
-- Three switchable illustrative workflows.
-- Native FAQ disclosures.
-- Local enquiry-planner preview, with distinct recommendations by workflow and organisation size. No submission, network request or storage.
-- Keyboard focus styles, skip link, reduced-motion preference and a useful no-JavaScript fallback.
+```sh
+python3 -m http.server 8000 --directory out
+```
 
-“Automation Studio” is a working name. Proposed service language is illustrative, not a claim of delivered client results. No testimonials, customer logos, savings figures or certifications are invented. Production booking, lead capture, policies, analytics and deployment are deliberately not connected at this design-review stage.
+## Change the name and logo
 
-## Implementation and hosting
+Edit [`src/config/brand.ts`](src/config/brand.ts):
 
-Read [the hosting comparison, Webflow stack changes and rollout guide](docs/hosting-and-rollout.md). The recommended next implementation is a portable Next.js/TypeScript/Tailwind site, initially exported statically to Hetzner if the existing environment is suitable. No framework is installed just to review these designs.
+- `name`: header/footer wordmark, accessible home links, document title and sharing metadata.
+- `logo.src`, `logo.width`, `logo.height`: replace the mark with an asset in `public/brand/`. Set dimensions to the asset's natural ratio.
+- `logo.showName`: set `false` if the supplied logo already contains the agency name.
+- `icon`: the favicon asset, which may differ from the main logo.
+- `description`, `tagline` and founder details: centrally managed copy.
+- `contactEmail` / `bookingUrl`: owner-approved public contact destinations; currently blank. A configured link appears after the planner recommendation.
+- `siteUrl`: the final HTTPS origin. Leave blank for review builds, which emit `noindex`. Set it only when the site is ready for public indexing.
 
-Keep the scroll-based homepage, then add dedicated service/case-study/legal URLs when their content warrants them. Avoid scroll hijacking and mandatory section snapping.
+Rebuild after changes. The shared Brand component supports wrapping names and rectangular marks. Anchor offsets adapt to header height. The decorative hero orbit is a workflow illustration, independent of the agency logo. Historic drafts intentionally retain their original working identity.
 
-See [verification notes](docs/design-review.md) for the tested scope and remaining production checks.
+The Orbit colour tokens live at the top of `src/app/globals.css`. Tailwind v4 utilities are available; the approved composition uses readable component CSS without Tailwind's reset changing the draft layout.
 
-## Scope of this change
+## What works now
 
-This is a design review package. It does not select a final brand, deploy a public production site, modify existing Hetzner projects, purchase plans or connect external services.
+- Sticky header; native mobile menu disclosure, also usable without JavaScript.
+- Anchor navigation, current-section tracking, Escape/outside-click dismissal and close-on-navigation.
+- “Let’s talk” uses a background/border selected state. Underline markers apply only to ordinary menu links; the CTA retains a keyboard focus outline.
+- Three illustrative workflow examples, native FAQs and a browser-local assessment planner.
+- Skip link, reduced-motion support, labelled controls and server-rendered public content.
+- Central metadata and replaceable branding; no external fonts, images or analytics requests.
+
+The planner sends and stores no data. There is no enquiry submission, authentication, admin area, CRM integration or live deployment in this increment. Do not present the examples as client results.
+
+## Structure
+
+```text
+src/app/           Public page, layout, metadata and Orbit styles
+src/components/    Header, shared branding and interactive sections
+src/config/        Provisional brand and public contact configuration
+src/lib/           Workflow examples and recommendation logic
+public/brand/      Replaceable identity assets
+tests/             Planner checks
+out/               Generated static export (ignored)
+drafts/            All five original HTML design options (retained)
+docs/              Design history, implementation and hosting notes
+```
+
+See [Orbit implementation and verification](docs/orbit-implementation.md) and the earlier [hosting/Webflow comparison](docs/hosting-and-rollout.md). That comparison is historical research dated 5 November 2026; verify vendor terms before purchasing.
+
+## Deployment boundary
+
+Serve **only `out/`** on Hetzner with Caddy/nginx. Do not serve the repository root, which contains reference drafts and source. Build a release, upload it into a new directory, switch the web root/symlink after a smoke check, and retain the previous release for rollback. No server access, DNS changes or deployment credentials are configured here.
+
+Next.js [static exports](https://nextjs.org/docs/app/guides/static-exports) remain portable across static web hosts. A future authenticated admin area with stored enquiries will need a backend: either switch this application to a server deployment or provide a separate service. That decision and implementation are deferred.
