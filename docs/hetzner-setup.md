@@ -35,7 +35,7 @@ The following commands run as **root on the server**, not in PowerShell:
 apt-get update
 apt-get upgrade -y
 apt-get install -y ca-certificates curl gnupg xz-utils git python3 sudo \
-  build-essential debian-keyring debian-archive-keyring apt-transport-https
+  build-essential nano openssl debian-keyring debian-archive-keyring apt-transport-https
 ```
 
 Install Node 24 from the official Linux x64 distribution, checking its published checksum:
@@ -142,8 +142,8 @@ Use plain `KEY=value` lines without `export`. Quote values containing spaces or 
 Check the local database connection without printing credentials:
 
 ```bash
-sudo -u agency /usr/local/bin/node --env-file=/etc/agency/site.env -e \
-  'const u=new URL(process.env.DATABASE_URL); console.log("Database host:",u.hostname,"database:",u.pathname)'
+(cd / && sudo -u agency /usr/local/bin/node --env-file=/etc/agency/site.env -e \
+  'const u=new URL(process.env.DATABASE_URL); console.log("Database host:",u.hostname,"database:",u.pathname)')
 ss -lnt | grep ':5432'
 ```
 
