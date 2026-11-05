@@ -1,5 +1,10 @@
 name: Website checks
 on:
+  workflow_call:
+    inputs:
+      package_release:
+        type: boolean
+        default: false
   pull_request:
   push:
     branches: [main]
@@ -7,7 +12,7 @@ permissions:
   contents: read
 jobs:
   check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     services:
       postgres:
@@ -35,6 +40,11 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
+      - name: Validate deployment scripts
+        run: |
+          for file in deploy/*.sh; do bash -n "$file"; done
+          shellcheck deploy/*.sh
+          python3 -m unittest discover -s tests/deploy -v
       - run: npm ci
       - name: Generate ephemeral test secret
         run: node -e "require('fs').appendFileSync(process.env.GITHUB_ENV, 'BETTER_AUTH_SECRET=' + require('crypto').randomBytes(48).toString('base64url') + '\n')"
@@ -54,3 +64,15 @@ jobs:
           done
           curl --silent --fail http://localhost:3000 > /dev/null
           node --import tsx tests/integration/owner-inbox.mjs
+      - name: Package and validate release
+        env:
+          RELEASE_SHA: ${{ github.sha }}
+        run: bash deploy/package-release.sh "$RELEASE_SHA" /tmp/agency-release.tar.gz
+      - name: Upload tested release
+        if: inputs.package_release
+        uses: actions/upload-artifact@v4
+        with:
+          name: agency-release
+          path: /tmp/agency-release.tar.gz
+          retention-days: 3
+          if-no-files-found: error
