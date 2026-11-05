@@ -1,11 +1,17 @@
-import { brand } from "@/config/brand";
+import type { PublicBrand } from "@/server/settings";
 
 /** A replaceable mark plus a wrapping wordmark; no initials baked into the layout. */
-export function Brand({ footer = false }: { footer?: boolean }) {
+export function Brand({
+  brand,
+  footer = false,
+}: {
+  brand: PublicBrand;
+  footer?: boolean;
+}) {
   return (
     <a
       className={`brand${footer ? " brand-footer" : ""}`}
-      href="#home"
+      href="/#home"
       aria-label={`${brand.name} home`}
     >
       <img

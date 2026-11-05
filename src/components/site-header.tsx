@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type MouseEvent } from "react";
+import type { PublicBrand } from "@/server/settings";
 import { Brand } from "./brand";
 import { Arrow } from "./arrow";
 
@@ -12,7 +13,7 @@ const links = [
   ["contact", "Let’s talk"],
 ] as const;
 
-export function SiteHeader() {
+export function SiteHeader({ brand }: { brand: PublicBrand }) {
   const [current, setCurrent] = useState("");
   const disclosure = useRef<HTMLDetailsElement>(null);
   const header = useRef<HTMLElement>(null);
@@ -110,7 +111,7 @@ export function SiteHeader() {
   return (
     <header className="site-header" ref={header}>
       <div className="wrap header-inner">
-        <Brand />
+        <Brand brand={brand} />
         <nav className="nav desktop-navigation" aria-label="Main navigation">
           {navigation}
         </nav>

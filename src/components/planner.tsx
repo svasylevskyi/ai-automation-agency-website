@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, type FormEvent } from "react";
-import { brand } from "@/config/brand";
+import type { PublicBrand } from "@/server/settings";
 import {
   areas,
   getRecommendation,
@@ -10,7 +10,7 @@ import {
 } from "@/lib/planner";
 import { Arrow } from "./arrow";
 
-export function Planner() {
+export function Planner({ brand }: { brand: PublicBrand }) {
   const [area, setArea] = useState<Area>("sales");
   const [size, setSize] = useState<TeamSize>("small");
   const [result, setResult] = useState<ReturnType<
