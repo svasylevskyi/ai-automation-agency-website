@@ -415,3 +415,49 @@
   margin: 6px 0;
   white-space: pre-wrap;
 }
+
+.retention-editor,
+.backup-status {
+  max-width: 900px;
+}
+.retention-editor fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.retention-editor .check-field {
+  margin-top: 24px;
+}
+.retention-editor fieldset > .button {
+  margin-top: 24px;
+}
+.retention-preview {
+  margin: 24px 0;
+}
+.table-scroll {
+  overflow-x: auto;
+}
+.retention-preview table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+.retention-preview th,
+.retention-preview td {
+  border-bottom: 1px solid #e1daed;
+  padding: 12px;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+.retention-preview small {
+  display: block;
+  color: #756b83;
+  margin-top: 5px;
+}
+.backup-status {
+  margin-top: 28px;
+}
+.backup-status .enquiry-facts {
+  grid-template-columns: minmax(100px, 160px) minmax(0, 1fr);
+}

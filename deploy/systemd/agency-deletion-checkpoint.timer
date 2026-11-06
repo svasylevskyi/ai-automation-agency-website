@@ -1,0 +1,10 @@
+[Unit]
+Description=Agency deletion checkpoint to R2
+
+[Timer]
+OnCalendar=*-*-* *:07:00 UTC
+RandomizedDelaySec=1min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

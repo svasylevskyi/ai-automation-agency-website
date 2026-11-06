@@ -1,0 +1,18 @@
+[Unit]
+Description=Verify agency recovery in an isolated database
+After=postgresql.service network-online.target
+Wants=network-online.target
+Requires=postgresql.service
+ConditionPathExists=/etc/agency/restic.env
+
+[Service]
+Type=oneshot
+User=root
+UMask=0077
+ExecStart=/usr/local/sbin/agency-offsite verify
+TimeoutStartSec=3h
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/agency-backup /var/cache/agency-backup /var/lib/agency-backup-status /var/lib/postgresql/agency-backups

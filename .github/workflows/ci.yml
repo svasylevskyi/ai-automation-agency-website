@@ -64,6 +64,13 @@ jobs:
           done
           curl --silent --fail http://localhost:3000 > /dev/null
           node --import tsx tests/integration/owner-inbox.mjs
+      - name: Test encrypted backup and isolated database recovery
+        env:
+          POSTGRES_CONTAINER_ID: ${{ job.services.postgres.id }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y restic
+          python3 tests/integration/backup-recovery.py
       - name: Package and validate release
         env:
           RELEASE_SHA: ${{ github.sha }}
