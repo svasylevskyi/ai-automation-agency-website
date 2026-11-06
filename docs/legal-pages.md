@@ -6,8 +6,8 @@ The website has public `/privacy` and `/terms` pages, linked from the footer, as
 
 | Field in Admin → Settings | Website behavior | When blank |
 | --- | --- | --- |
-| Public email | A `mailto:` link beside the enquiry data-use explanation and an email fallback in the no-JavaScript message. Uses the visitor's email application. | Those email links are hidden; the enquiry form still works. |
-| Booking URL | Adds “Prefer a call? Choose a time” below the form, linking to the supplied HTTPS scheduling page. It is a link, not an embedded booking system. | The booking option is hidden. |
+| Public email | A `mailto:` link beside the enquiry data-use explanation and an email fallback in the no-JavaScript message. Uses the visitor's email application and supplies Reply-To for new visitor confirmation emails. | Those email links are hidden; the enquiry form still works. |
+| Booking URL | Adds “Prefer a call? Choose a time” below the form, linking to the supplied HTTPS scheduling page. Also included in new confirmation emails. It is a link, not an embedded booking system. | The booking option is hidden. |
 | Custom Privacy Policy URL | Overrides Privacy Policy links in the footer, guide and enquiry form. Use only when hosting the policy elsewhere. | All those links use the built-in `/privacy` page. |
 
 These fields are public presentation settings. They do not configure SMTP, the `NOTIFICATION_EMAIL` recipient or the text of either legal page. Existing HTTPS privacy URLs are preserved; the privacy editor explains that clearing the override is necessary to direct visitors to the built-in page. Website Terms always link to `/terms`.
@@ -28,11 +28,11 @@ The drafts leave placeholders for legal/trading identity, registration details, 
 
 The current build allows manual enquiry deletion and cleans expired rate-limit/session rows, but does not automatically expire enquiries or rotate backups. Changing the legal text does not change that behavior. Confirm and implement the chosen retention schedule before declaring the policy ready. Do not state that no international transfers occur without checking the actual supplier/access arrangements.
 
-The existing checkbox remains an acknowledgement of the short enquiry data-use explanation, not marketing consent or acceptance of a paid engagement. New enquiries store `enquiry-v3`; older records retain their original notice version. The counter on an editable legal page is not attached to this acknowledgement, and this increment does not claim to collect versioned acceptance of Website Terms. If a later service needs contractual acceptance/audit history, implement that deliberately for the relevant service.
+The existing checkbox remains an acknowledgement of the short enquiry data-use explanation, not marketing consent or acceptance of a paid engagement. New enquiries store `enquiry-v4`, which also explains receipt emails; older records retain their original notice version. The counter on an editable legal page is not attached to this acknowledgement, and this increment does not claim to collect versioned acceptance of Website Terms. If a later service needs contractual acceptance/audit history, implement that deliberately for the relevant service.
 
 ## Storage and deployment
 
-Migration `003-legal-pages.sql` creates `legal_pages`. The migration script seeds the two complete texts only when their rows do not exist. Re-running migrations or deploying future code preserves all owner edits. Existing enquiries, settings, owner credentials and custom Privacy Policy URLs are preserved.
+Migration `003-legal-pages.sql` creates `legal_pages`. The migration script seeds the two complete texts only when their rows do not exist. Re-running migrations or deploying future code preserves all owner edits. Migration 004 refreshes only the exact untouched version-1 review drafts to describe receipt emails and activity history; customised pages must be reviewed manually for these additions. Existing enquiries, settings, owner credentials and custom Privacy Policy URLs are preserved.
 
 The existing deployment backs up the database and applies the migration automatically. No new environment variables or dependencies are required. Local upgrades need `npm run db:migrate` before starting the app. The release package already includes `src/content/`, so first-run seeding also works from an unpacked release.
 

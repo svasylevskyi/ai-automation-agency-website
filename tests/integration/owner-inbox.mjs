@@ -8,6 +8,7 @@ import { provisionOwner } from "../../src/server/provision.ts";
 import { issueChallenge } from "../../src/server/spam.ts";
 import { recommendAssessment } from "../../src/lib/assessment.ts";
 import { sendNotification } from "../../src/server/mail.ts";
+import { checkFollowUp } from "./follow-up.mjs";
 
 if (!new URL(process.env.DATABASE_URL).pathname.endsWith("_test"))
   throw new Error(
@@ -302,7 +303,13 @@ try {
     await call(
       `/api/admin/enquiries/${id}`,
       "PATCH",
-      { status: "contacted", notes: "Private follow-up", version: 1 },
+      {
+        status: "contacted",
+        notes: "Private follow-up",
+        nextAction: "",
+        followUpDate: null,
+        version: 1,
+      },
       true,
       "https://attacker.test",
     ),
@@ -312,7 +319,13 @@ try {
     await call(
       `/api/admin/enquiries/${id}`,
       "PATCH",
-      { status: "contacted", notes: "Private follow-up", version: 1 },
+      {
+        status: "contacted",
+        notes: "Private follow-up",
+        nextAction: "",
+        followUpDate: null,
+        version: 1,
+      },
       true,
     ),
     200,
@@ -321,7 +334,13 @@ try {
     await call(
       `/api/admin/enquiries/${id}`,
       "PATCH",
-      { status: "closed", notes: "stale", version: 1 },
+      {
+        status: "closed",
+        notes: "stale",
+        nextAction: "",
+        followUpDate: null,
+        version: 1,
+      },
       true,
     ),
     409,
@@ -391,6 +410,8 @@ try {
     body: '<svg onload="alert(1)"/>',
   });
   status(unsafe, 400);
+  const followUpChecks = await checkFollowUp({ call, status, enquiry, db });
+  checks += followUpChecks;
   // A mail outage must not lose the saved enquiry; retry is idempotent once sent.
   await db().query(
     "UPDATE enquiries SET notification_status='pending' WHERE id=$1",
@@ -425,7 +446,8 @@ try {
   );
   checks++;
   // New submissions hit a persistent limit, while retrying the same token remains safe.
-  for (let i = 0; i < 4; i++)
+  await db().query("DELETE FROM request_limits");
+  for (let i = 0; i < 5; i++)
     await call("/api/enquiries", "POST", {
       ...enquiry,
       email: `limit${i}@example.test`,
@@ -487,7 +509,7 @@ try {
   ).rows;
   assert.equal(assessedRows.length, 1);
   assert.equal(assessedRows[0].message, "");
-  assert.equal(assessedRows[0].privacy_notice_version, "enquiry-v3");
+  assert.equal(assessedRows[0].privacy_notice_version, "enquiry-v4");
   assert.deepEqual(assessedRows[0].assessment, {
     ...assessment,
     recommendation: recommendAssessment(assessment),
@@ -665,7 +687,7 @@ try {
     JSON.stringify(saved.data),
   ]);
   console.log(
-    `Passed ${checks} integration assertions: auth, ownership, editable legal pages, enquiries, guided assessments, persistence, mail recovery, settings, logos, conflicts, deletion, rate limiting, password changes and session revocation.`,
+    `Passed ${checks} integration assertions: auth, ownership, editable legal pages, follow-up dates/history/receipts, enquiries, guided assessments, persistence, mail recovery, settings, logos, conflicts, deletion, rate limiting, password changes and session revocation.`,
   );
 } finally {
   await db().end();

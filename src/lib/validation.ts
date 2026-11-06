@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { assessmentSchema } from "./assessment";
+import { followUpDate } from "./follow-up";
 
 export const statuses = {
   new: "New",
@@ -76,11 +77,28 @@ export const enquirySchema = z
       });
     }
   });
-export const enquiryUpdateSchema = z.object({
-  status: statusSchema,
-  notes: z.string().max(10000),
-  version: z.number().int().min(1),
-});
+export const enquiryUpdateSchema = z
+  .object({
+    status: statusSchema,
+    notes: z.string().max(10000),
+    version: z.number().int().min(1),
+    nextAction: z.string().trim().max(300),
+    followUpDate: followUpDate.nullable(),
+  })
+  .superRefine((value, ctx) => {
+    if (!!value.nextAction !== !!value.followUpDate)
+      ctx.addIssue({
+        code: "custom",
+        path: ["followUpDate"],
+        message: "Add both a next action and a follow-up date, or clear both.",
+      });
+    if (value.status === "closed" && value.nextAction)
+      ctx.addIssue({
+        code: "custom",
+        path: ["status"],
+        message: "Complete or clear the follow-up before closing this enquiry.",
+      });
+  });
 
 export const passwordChangeSchema = z
   .object({

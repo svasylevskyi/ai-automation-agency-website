@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { enquiryUpdateSchema } from "@/lib/validation";
 import { db } from "@/server/db";
+import { updateEnquiry } from "@/server/enquiries";
 import {
   apiError,
   json,
@@ -16,16 +17,7 @@ export async function PATCH(request: Request, context: Context) {
     await requireApiOwner(request);
     const id = z.uuid().parse((await context.params).id);
     const input = enquiryUpdateSchema.parse(await readJson(request, 45000));
-    const { rows } = await db().query(
-      "UPDATE enquiries SET status=$1,notes=$2,version=version+1,updated_at=now() WHERE id=$3 AND version=$4 RETURNING version",
-      [input.status, input.notes, id, input.version],
-    );
-    if (!rows.length)
-      throw new HttpError(
-        409,
-        "This enquiry changed or was deleted. Reload before editing again.",
-      );
-    return json({ version: rows[0].version });
+    return json(await updateEnquiry(id, input));
   } catch (error) {
     return apiError(error);
   }

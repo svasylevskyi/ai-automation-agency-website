@@ -22,7 +22,7 @@ export async function POST(
       !(await db().query("SELECT id FROM enquiries WHERE id=$1", [id])).rowCount
     )
       throw new HttpError(404, "Enquiry not found.");
-    await sendNotification(id);
+    await sendNotification(id, true);
     const { rows } = await db().query(
       "SELECT notification_status FROM enquiries WHERE id=$1",
       [id],

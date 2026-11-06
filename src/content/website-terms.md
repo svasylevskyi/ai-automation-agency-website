@@ -18,7 +18,7 @@ An optional booking link may take you to a separate provider. Its availability a
 
 These terms are available before you use the assessment or enquiry form. You can save or print them using your browser. The free assessment service starts when you choose to use the guide; it ends when you stop using it or leave the page. You can go back, edit your answers or stop at any time without a charge.
 
-The electronic enquiry service is requested when you submit the completed form. A successful on-screen confirmation means the website received the enquiry. If the form reports a failure, follow the message and retry when appropriate. A technical acknowledgement is not acceptance of a project or a promise to reply within a particular period.
+The electronic enquiry service is requested when you submit the completed form. A successful on-screen confirmation means the website received the enquiry. If the form reports a failure, follow the message and retry when appropriate. We also attempt to send a short confirmation email. Email delivery can be delayed or fail; the on-screen confirmation still means the enquiry was saved. A technical acknowledgement is not acceptance of a project or a promise to reply within a particular period.
 
 You can end use by closing the page. Unsent assessment answers are then lost. Closing the page does not withdraw a submitted enquiry or automatically erase its record; contact us if you wish to withdraw the request or exercise data rights.
 
