@@ -9,6 +9,7 @@ import { processEnquiryMail } from "@/server/mail";
 import { getSettings } from "@/server/settings";
 import { confirmationMessage } from "@/lib/confirmation";
 import { recordActivity } from "@/server/activity";
+import { enqueueProspect } from "@/server/prospect";
 export async function POST(request: Request) {
   try {
     sameOrigin(request);
@@ -52,7 +53,10 @@ export async function POST(request: Request) {
           JSON.stringify(confirmationMessage(settings)),
         ],
       );
-      if (result.rowCount) await recordActivity(client, id, "received");
+      if (result.rowCount) {
+        await recordActivity(client, id, "received");
+        await enqueueProspect(client, id);
+      }
       return !!result.rowCount;
     });
     if (created) after(() => processEnquiryMail(id));

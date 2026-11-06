@@ -396,6 +396,15 @@
 .activity-card {
   margin-top: 28px;
 }
+.prospect-card {
+  margin-top: 1.5rem;
+}
+.prospect-card .field {
+  margin-bottom: 1rem;
+}
+.prospect-card li + li {
+  margin-top: 0.5rem;
+}
 .activity-list {
   list-style: none;
   padding: 0;

@@ -1,0 +1,198 @@
+{
+  "name": "Agency — prepare prospect brief",
+  "active": false,
+  "nodes": [
+    {
+      "id": "every-minute",
+      "name": "Every minute",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "manual-test",
+      "name": "Manual test",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        100
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "website-configuration",
+      "name": "Website configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "website-url",
+              "name": "websiteUrl",
+              "value": "https://ai-automation-studio.duckdns.org",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "claim-one-enquiry",
+      "name": "Claim one enquiry",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "options": {
+          "timeout": 20000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          }
+        },
+        "url": "={{ $('Website configuration').first().json.websiteUrl + '/api/automation/prospects/claim' }}",
+        "jsonBody": "={}"
+      }
+    },
+    {
+      "id": "prepare-brief-and-draft",
+      "name": "Prepare brief and draft",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        300
+      ],
+      "parameters": {
+        "jsCode": "function prepareProspect(job) {\n  const e = job.enquiry;\n  const a = e.assessment;\n  const areas = {\n    sales: \"Sales and enquiries\",\n    operations: \"Documents and operations\",\n    support: \"Knowledge and support\",\n    other: \"Other / workflow to clarify\",\n  };\n  const teams = {\n    small: \"Small business or growing team\",\n    mid: \"Medium-sized business\",\n    large: \"Department in a larger organisation\",\n  };\n  const timings = {\n    soon: \"Would like to start soon\",\n    quarter: \"Within three months\",\n    exploring: \"Just exploring\",\n    unsure: \"Not specified\",\n  };\n  const goals = {\n    time: \"Less manual work\",\n    speed: \"Faster turnaround\",\n    accuracy: \"Fewer errors\",\n    knowledge: \"Easier access to information\",\n    unsure: \"Needs clarification\",\n  };\n  const frequencies = {\n    daily: \"Daily\",\n    weekly: \"Weekly\",\n    occasionally: \"Occasional\",\n    unsure: \"Not specified\",\n  };\n  const excerpt = (value, limit) =>\n    value.length > limit ? value.slice(0, limit) + \"… [excerpt]\" : value;\n  const questions = [];\n  if (!a?.workflowDescription)\n    questions.push(\n      \"Could you walk me through one example of the task, from its trigger to the finished result?\",\n    );\n  if (!a?.tools)\n    questions.push(\n      \"Which tools hold the information today, and who manages access to them?\",\n    );\n  if (!a || a.frequency === \"unsure\")\n    questions.push(\n      \"How often does this task happen, and roughly how much time does it take?\",\n    );\n  else\n    questions.push(\n      \"Roughly how much time does each occurrence take, and where do delays or errors happen?\",\n    );\n  if (!a || a.goal === \"unsure\")\n    questions.push(\n      \"What would a useful improvement look like, and how would you measure it?\",\n    );\n  if (!a || a.timing === \"unsure\")\n    questions.push(\"Is there a target date or event driving this work?\");\n  questions.push(\n    \"Does the process involve sensitive information, and which steps must remain under human approval?\",\n  );\n  const actions = {\n    sales:\n      \"Review one enquiry-to-response workflow and confirm who approves drafts before proposing a small pilot.\",\n    operations:\n      \"Review one document or reporting workflow, sample inputs and exception handling before proposing a small pilot.\",\n    support:\n      \"Review one question category, approved information sources and escalation rules before proposing a small pilot.\",\n    other:\n      \"Map one recurring task, its inputs, tools and human decisions. Confirm whether automation would help before recommending a solution.\",\n  };\n  const nextAction =\n    actions[e.area] +\n    (a?.frequency === \"occasionally\"\n      ? \" Compare the benefit with a simpler checklist or template.\"\n      : \" Establish the current time or error baseline.\");\n  const lines = [\n    `Workflow: ${areas[e.area]}`,\n    `Organisation: ${e.company || \"Not supplied\"} · ${teams[e.teamSize]}`,\n    `Timing reported: ${a ? timings[a.timing] : \"Not supplied\"}`,\n    ...(a\n      ? [\n          `Frequency: ${frequencies[a.frequency]} · Desired outcome: ${goals[a.goal]}`,\n          `Tools reported: ${a.tools || \"Not supplied\"}`,\n          `Task reported: ${a.workflowDescription || \"Not supplied\"}`,\n        ]\n      : [\"No guided assessment attached; clarify the workflow in discovery.\"]),\n    `Message excerpt (visitor's own words): ${e.message ? excerpt(e.message, 700) : \"No additional message\"}`,\n    \"Fit, budget, access permissions and feasibility have not been verified.\",\n  ];\n  return {\n    jobId: job.jobId,\n    claimToken: job.claimToken,\n    result: {\n      method: \"rules-v1\",\n      brief: lines.join(\"\\n\"),\n      discoveryQuestions: questions,\n      nextAction,\n      replyDraft:\n        \"Hello,\\n\\nThank you for sharing your enquiry. To understand whether a small automation would be useful, could you tell me:\\n\\n\" +\n        questions\n          .slice(0, 3)\n          .map((q, i) => `${i + 1}. ${q}`)\n          .join(\"\\n\") +\n        \"\\n\\nA general description is enough at this stage; please do not send passwords, access keys or sensitive records.\\n\\nBest regards,\\n[Your name]\",\n    },\n  };\n}\n\nconst job = $input.first().json.job;\nreturn job ? [{ json: prepareProspect(job) }] : [];\n"
+      }
+    },
+    {
+      "id": "return-for-owner-review",
+      "name": "Return for owner review",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        960,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "options": {
+          "timeout": 20000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          }
+        },
+        "url": "={{ $('Website configuration').first().json.websiteUrl + '/api/automation/prospects/complete' }}",
+        "jsonBody": "={{ JSON.stringify($json) }}"
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    }
+  ],
+  "connections": {
+    "Every minute": {
+      "main": [
+        [
+          {
+            "node": "Website configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual test": {
+      "main": [
+        [
+          {
+            "node": "Website configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Website configuration": {
+      "main": [
+        [
+          {
+            "node": "Claim one enquiry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claim one enquiry": {
+      "main": [
+        [
+          {
+            "node": "Prepare brief and draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare brief and draft": {
+      "main": [
+        [
+          {
+            "node": "Return for owner review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Warsaw",
+    "executionTimeout": 60,
+    "saveDataErrorExecution": "none",
+    "saveDataSuccessExecution": "none",
+    "saveManualExecutions": false,
+    "saveExecutionProgress": false
+  },
+  "pinData": {},
+  "tags": []
+}

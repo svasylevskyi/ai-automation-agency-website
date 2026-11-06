@@ -26,6 +26,10 @@ export function describeActivity(kind: string, details: Details) {
       return "History tracking started. Earlier changes are not available.";
     case "received":
       return "Enquiry received.";
+    case "prospect_queued":
+      return "Prospect brief queued for n8n. No customer email scheduled.";
+    case "prospect_prepared":
+      return "Prospect brief and reply draft prepared for owner review. No customer email sent.";
     case "status_changed":
       return `Status: ${statuses[details.from!] ?? details.from} → ${statuses[details.to!] ?? details.to}.`;
     case "notes_updated":
