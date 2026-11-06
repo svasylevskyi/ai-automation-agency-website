@@ -10,6 +10,7 @@ import type { PublicBrand } from "@/server/settings";
 import { areas, teamSizes } from "@/lib/planner";
 import { recommendAssessment, type AssessmentAnswers } from "@/lib/assessment";
 import { AssessmentSummary, Recommendation } from "./assessment-summary";
+import { privacyHref } from "@/lib/legal";
 import { Arrow } from "./arrow";
 
 export function EnquiryForm({
@@ -239,13 +240,16 @@ export function EnquiryForm({
             Please leave out passwords and sensitive client information. Your
             contact details, message and any attached assessment are stored for
             the agency owner to review and respond. We do not add you to a
-            marketing list.
-            {brand.privacyUrl && (
-              <>
-                {" "}
-                <a href={brand.privacyUrl}>Read the privacy notice.</a>
-              </>
-            )}
+            marketing list.{" "}
+            <a
+              href={privacyHref(brand.privacyUrl)}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Read the Privacy Policy
+              <span className="sr-only"> (opens in a new tab)</span>
+            </a>
+            .
             {brand.contactEmail && (
               <>
                 {" "}
@@ -256,6 +260,14 @@ export function EnquiryForm({
                 .
               </>
             )}
+          </p>
+          <p className="privacy-note">
+            The form and guide are provided under our{" "}
+            <a href="/terms" target="_blank" rel="noopener noreferrer">
+              Website Terms
+              <span className="sr-only"> (opens in a new tab)</span>
+            </a>
+            . Sending an enquiry does not book or purchase services.
           </p>
           <label className="check-field">
             <input

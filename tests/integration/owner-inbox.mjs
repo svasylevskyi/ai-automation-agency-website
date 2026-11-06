@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { randomBytes, randomUUID } from "node:crypto";
 import sharp from "sharp";
 import { db } from "../../src/server/db.ts";
@@ -97,6 +99,137 @@ try {
   checks++;
   cookie = cookies.map((c) => c.split(";")[0]).join("; ");
   status(await call("/admin", "GET", undefined, true), 200);
+  // Public legal pages, owner-only editing, safe rendering and migration preservation.
+  const legalOriginals = (
+    await db().query("SELECT * FROM legal_pages ORDER BY slug")
+  ).rows;
+  assert.equal(legalOriginals.length, 2);
+  checks++;
+  for (const slug of ["privacy", "terms"]) {
+    const page = await call(`/${slug}`);
+    status(page, 200);
+    const html = await page.text();
+    assert.match(html, /Draft for review/);
+    assert.match(html, /LEGAL_NAME/);
+    assert.match(html, /name="robots" content="noindex/);
+    assert.match(html, new RegExp(`rel="canonical" href="${base}/${slug}"`));
+    checks += 4;
+  }
+  const settingsPage = await call("/admin/settings", "GET", undefined, true);
+  status(settingsPage, 200);
+  assert.match(await settingsPage.text(), /Save Privacy Policy/);
+  checks++;
+  const originalPrivacy = legalOriginals.find(
+    (page) => page.slug === "privacy",
+  );
+  const legalUpdate = {
+    title: "Reviewed privacy draft",
+    content:
+      "## Contact details\n\nA draft with enough detail for a meaningful review. ".repeat(
+        5,
+      ) + '<script>alert("legal-xss")</script>',
+    isDraft: true,
+    version: originalPrivacy.version,
+  };
+  status(await call("/api/admin/legal/privacy", "PUT", legalUpdate), 401);
+  status(
+    await call(
+      "/api/admin/legal/privacy",
+      "PUT",
+      legalUpdate,
+      true,
+      "https://attacker.test",
+    ),
+    403,
+  );
+  status(await call("/api/admin/legal/unknown", "PUT", legalUpdate, true), 404);
+  status(
+    await call(
+      "/api/admin/legal/privacy",
+      "PUT",
+      { ...legalUpdate, content: "too short" },
+      true,
+    ),
+    400,
+  );
+  status(
+    await call(
+      "/api/admin/legal/privacy",
+      "PUT",
+      { ...legalUpdate, content: "x".repeat(60001) },
+      true,
+    ),
+    400,
+  );
+  status(
+    await call(
+      "/api/admin/legal/privacy",
+      "PUT",
+      { ...legalUpdate, content: originalPrivacy.content, isDraft: false },
+      true,
+    ),
+    400,
+  );
+  const legalSaved = await call(
+    "/api/admin/legal/privacy",
+    "PUT",
+    legalUpdate,
+    true,
+  );
+  status(legalSaved, 200);
+  const legalVersion = (await legalSaved.json()).version;
+  assert.equal(legalVersion, originalPrivacy.version + 1);
+  checks++;
+  status(await call("/api/admin/legal/privacy", "PUT", legalUpdate, true), 409);
+  const updatedPrivacy = await (await call("/privacy")).text();
+  assert.match(updatedPrivacy, /<title>Reviewed privacy draft/);
+  assert.match(updatedPrivacy, /&lt;script&gt;/);
+  assert.doesNotMatch(updatedPrivacy, /<script>alert/);
+  checks += 3;
+  await promisify(execFile)(
+    process.execPath,
+    ["--import", "tsx", "scripts/migrate.ts"],
+    { env: process.env },
+  );
+  const preserved = (
+    await db().query(
+      "SELECT content,version FROM legal_pages WHERE slug='privacy'",
+    )
+  ).rows[0];
+  assert.equal(preserved.content, legalUpdate.content);
+  assert.equal(preserved.version, legalVersion);
+  assert.equal(
+    (await db().query("SELECT content FROM legal_pages WHERE slug='terms'"))
+      .rows[0].content,
+    legalOriginals.find((page) => page.slug === "terms").content,
+  );
+  checks += 3;
+  status(
+    await call(
+      "/api/admin/legal/privacy",
+      "PUT",
+      { ...legalUpdate, isDraft: false, version: legalVersion },
+      true,
+    ),
+    200,
+  );
+  const readyPrivacy = await (await call("/privacy")).text();
+  assert.doesNotMatch(readyPrivacy, /Draft for review/);
+  // Site-wide test mode still suppresses indexing even when a page is ready.
+  assert.match(readyPrivacy, /name="robots" content="noindex/);
+  checks += 2;
+  for (const page of legalOriginals)
+    await db().query(
+      "UPDATE legal_pages SET title=$1,content=$2,is_draft=$3,version=$4,updated_at=$5 WHERE slug=$6",
+      [
+        page.title,
+        page.content,
+        page.is_draft,
+        page.version,
+        page.updated_at,
+        page.slug,
+      ],
+    );
   const ownerId = (await db().query("SELECT user_id FROM site_owner")).rows[0]
     .user_id;
   await db().query("DELETE FROM site_owner");
@@ -207,6 +340,7 @@ try {
     name: "A Longer Agency Name for Tomorrow",
     contactEmail: "public@example.test",
     bookingUrl: "https://example.test/book",
+    privacyUrl: "https://example.test/privacy",
     version: saved.version,
   };
   status(await call("/api/admin/settings", "PUT", newSettings, true), 200);
@@ -215,6 +349,10 @@ try {
   const html = await home.text();
   assert.match(html, /<title>A Longer Agency Name for Tomorrow/);
   assert.match(html, /public@example.test/);
+  assert.match(html, /href="https:\/\/example.test\/privacy"/);
+  assert.match(html, /href="\/terms"/);
+  assert.match(await (await call("/privacy")).text(), /Privacy Policy/);
+  checks += 3;
   assert.doesNotMatch(html, /Private follow-up/);
   checks++;
   const png = await sharp({
@@ -349,7 +487,7 @@ try {
   ).rows;
   assert.equal(assessedRows.length, 1);
   assert.equal(assessedRows[0].message, "");
-  assert.equal(assessedRows[0].privacy_notice_version, "enquiry-v2");
+  assert.equal(assessedRows[0].privacy_notice_version, "enquiry-v3");
   assert.deepEqual(assessedRows[0].assessment, {
     ...assessment,
     recommendation: recommendAssessment(assessment),
@@ -527,7 +665,7 @@ try {
     JSON.stringify(saved.data),
   ]);
   console.log(
-    `Passed ${checks} integration assertions: auth, ownership, enquiries, guided assessments, persistence, mail recovery, settings, logos, conflicts, deletion, rate limiting, password changes and session revocation.`,
+    `Passed ${checks} integration assertions: auth, ownership, editable legal pages, enquiries, guided assessments, persistence, mail recovery, settings, logos, conflicts, deletion, rate limiting, password changes and session revocation.`,
   );
 } finally {
   await db().end();

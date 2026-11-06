@@ -380,6 +380,11 @@ export function SettingsForm({
           onChange={(e) => field("contactEmail", e.target.value)}
           maxLength={254}
         />
+        <small>
+          Shown beside the enquiry form for questions about personal data, and
+          as an email fallback if JavaScript is unavailable. Opens the visitor’s
+          email application. This does not change the notification recipient.
+        </small>
       </label>
       <label className="field">
         <span>
@@ -391,10 +396,14 @@ export function SettingsForm({
           onChange={(e) => field("bookingUrl", e.target.value)}
           maxLength={500}
         />
+        <small>
+          Adds “Prefer a call? Choose a time” below the enquiry form. Use your
+          scheduling page URL. Leave blank to hide the option.
+        </small>
       </label>
       <label className="field">
         <span>
-          Privacy notice URL <small>(optional, HTTPS)</small>
+          Custom Privacy Policy URL <small>(optional, HTTPS)</small>
         </span>
         <input
           type="url"
@@ -402,6 +411,11 @@ export function SettingsForm({
           onChange={(e) => field("privacyUrl", e.target.value)}
           maxLength={500}
         />
+        <small>
+          Leave blank to use the built-in /privacy page edited below. Set an
+          HTTPS URL only if your policy is hosted elsewhere; it overrides policy
+          links in the footer, guide and enquiry form.
+        </small>
       </label>
       <p className="privacy-note">
         The inbox notification recipient is configured separately on the server.

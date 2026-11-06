@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import type { PublicBrand } from "@/server/settings";
 import type { AssessmentAnswers } from "@/lib/assessment";
 import { EnquiryForm } from "./enquiry-form";
+import { privacyHref } from "@/lib/legal";
 import { Planner } from "./planner";
 
 export function ContactForms({ brand }: { brand: PublicBrand }) {
@@ -24,6 +25,7 @@ export function ContactForms({ brand }: { brand: PublicBrand }) {
         <details className="planner-disclosure" ref={guide}>
           <summary>Explore a starting point — optional 3-step guide</summary>
           <Planner
+            privacyUrl={privacyHref(brand.privacyUrl)}
             editRequest={editRequest}
             onDiscuss={(answers) => {
               setAssessment(answers);

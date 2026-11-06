@@ -52,9 +52,15 @@ See [guided assessment behavior, validation and review steps](docs/guided-assess
 
 ## Branding and settings
 
-Open **Owner area → Settings** to update the agency name, tagline, search/sharing description, logo, public email, booking URL and privacy notice URL. These changes apply on the next page load without a rebuild. Logos are limited to 2 MB PNG/JPEG/WebP, decoded and re-encoded as PNG, and stored in PostgreSQL; SVG uploads are rejected. Save settings after upload to publish the logo. A checkbox supports logos that already include the agency name.
+Open **Owner area → Settings** to update the agency name, tagline, search/sharing description, logo, public email, booking URL and optional custom Privacy Policy URL. These changes apply on the next page load without a rebuild. Logos are limited to 2 MB PNG/JPEG/WebP, decoded and re-encoded as PNG, and stored in PostgreSQL; SVG uploads are rejected. Save settings after upload to publish the logo. A checkbox supports logos that already include the agency name.
 
 [`src/config/brand.ts`](src/config/brand.ts) supplies initial branding defaults. Once migrated, database settings are authoritative; editing those defaults will not overwrite saved settings. Original drafts retain their historical identity. The public email and server-side notification recipient are separate settings.
+
+## Privacy Policy and Website Terms
+
+Built-in pages are available at `/privacy` and `/terms`, with links in the footer, guide and enquiry form. Edit each page independently under **Owner area → Settings**, using the new title/text fields and preview. Leave the custom Privacy Policy URL blank to use `/privacy`; an existing external URL still overrides the public links.
+
+Both pages include full initial draft wording and clear placeholders for the business details and operating arrangements still to be confirmed. They are publicly visible review drafts and remain excluded from search indexing until marked ready. Saving changes updates the public page immediately; redeployment does not overwrite admin edits. See [legal page editing, field explanations and launch decisions](docs/legal-pages.md).
 
 ## Structure
 
