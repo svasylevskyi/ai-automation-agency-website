@@ -2,7 +2,7 @@
 
 A responsive, founder-led agency website built with Next.js, TypeScript and Tailwind. Orbit remains the visual direction; the name and logo are editable placeholders. All five reference concepts remain unchanged in [`drafts/`](drafts/index.html).
 
-The website now includes live enquiry capture, PostgreSQL storage, owner email notifications, a protected owner inbox with notes/statuses, and editable branding/contact settings. It runs as a **Node server**, not a static export.
+The website includes an optional guided workflow assessment with a transferable enquiry brief, live enquiry capture, PostgreSQL storage, owner email notifications, a protected owner inbox with notes/statuses, and editable branding/contact settings. It runs as a **Node server**, not a static export.
 
 ## Run locally on Windows
 
@@ -13,7 +13,7 @@ Install Node.js **24 LTS**, Git for Windows, and Docker Desktop with the WSL 2 b
 ```powershell
 git clone https://github.com/svasylevskyi/ai-automation-agency-website.git
 cd ai-automation-agency-website
-git switch feat/owner-inbox
+git switch main
 npm ci
 npm run setup:local
 docker compose up -d
@@ -22,7 +22,7 @@ npm run owner:create
 npm run dev
 ```
 
-Use `main` instead of the feature branch after the PR is merged. `owner:create` prompts for your email and a password (minimum 12 characters); there are no default owner credentials.
+`owner:create` prompts for your email and a password (minimum 12 characters); there are no default owner credentials.
 
 - Website: http://localhost:3000
 - Owner area: http://localhost:3000/admin
@@ -43,6 +43,12 @@ Mailpit captures outgoing emails locally; nothing is sent to a real email addres
 | `npm run maintenance`                      | Retry up to 100 pending/failed/stale notifications and remove expired request limits/sessions |
 
 Use **Owner area → Account** to change your password with the current password. Other sessions are revoked; the current session is rotated. The admin area has no public registration, invitation or email password-reset endpoint. Forgotten-password recovery requires local/server terminal access. Notification delivery is attempted after saving each enquiry; the inbox shows delivery state and provides a retry action. Run maintenance periodically in a future deployment. SMTP delivery is at least once: an interrupted send can result in a duplicate notification, but not a lost enquiry.
+
+## Guided workflow assessment
+
+The optional three-step guide recommends a first automation opportunity, including an “Other / I’m not sure yet” route. Visitors can attach their answers to an enquiry, review/edit/remove the summary, or contact you directly. The admin enquiry detail includes the structured brief and recommendation. Answers stay in the browser until the enquiry is submitted; no external AI service is required.
+
+See [guided assessment behavior, validation and review steps](docs/guided-assessment.md). Apply the new migration with `npm run db:migrate` when updating locally; the Hetzner deployment workflow applies it automatically.
 
 ## Branding and settings
 

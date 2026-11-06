@@ -836,7 +836,7 @@
     padding: 0 20px 23px 0;
   }
 
-  /* Browser-local planner; contact details are configured separately. */
+  /* Guided assessment and live enquiries. */
   .contact {
     background: #e8dff7;
   }
@@ -1364,9 +1364,11 @@
   cursor: wait;
 }
 .planner-disclosure {
-  margin-top: 24px;
-  border-top: 1px solid #dcd4eb;
-  padding-top: 20px;
+  margin-bottom: 24px;
+  padding: 8px 20px;
+  border: 1px solid #cfc1e4;
+  border-radius: 20px;
+  background: #ffffff70;
 }
 .planner-disclosure > summary {
   cursor: pointer;
@@ -1395,4 +1397,86 @@ button.text-link {
   font: inherit;
   cursor: pointer;
   text-align: left;
+}
+
+/* Shared assessment summary: visitor review and private owner inbox. */
+.assessment-facts {
+  display: grid;
+  grid-template-columns: minmax(90px, 0.7fr) minmax(0, 1.3fr);
+  gap: 12px 18px;
+  margin: 20px 0;
+  font-size: 0.85rem;
+}
+.assessment-facts dt {
+  color: var(--muted);
+}
+.assessment-facts dd {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.assessment-recommendation h4 {
+  font-size: 1.08rem;
+  line-height: 1.4;
+}
+.assessment-recommendation p {
+  margin-top: 12px;
+}
+.assessment-progress {
+  margin: 20px 0 10px;
+  font-size: 0.8rem;
+  color: var(--accent-text);
+}
+.assessment-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.planner .assessment-actions .button {
+  flex: 1 1 160px;
+  width: auto;
+}
+.planner .text-link {
+  margin-top: 18px;
+  min-height: 44px;
+  text-align: left;
+}
+.assessment-review {
+  margin-top: 20px;
+}
+.assessment-review summary {
+  cursor: pointer;
+  padding: 10px 0;
+  font-size: 0.85rem;
+}
+.attached-assessment {
+  padding: 22px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: #f7f3fc;
+  margin: 24px 0;
+}
+.attached-assessment > p {
+  margin-top: 10px;
+  font-size: 0.85rem;
+}
+.attached-assessment .text-link {
+  font-size: 0.85rem;
+  min-height: 44px;
+}
+@media (max-width: 480px) {
+  .assessment-facts {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+  .assessment-facts dd {
+    margin-bottom: 12px;
+  }
+  .attached-assessment {
+    padding: 18px;
+  }
+  .planner-disclosure .planner {
+    padding: 22px 16px;
+  }
 }

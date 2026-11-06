@@ -1,10 +1,9 @@
 import { getBrand } from "@/server/settings";
-import { EnquiryForm } from "@/components/enquiry-form";
+import { ContactForms } from "@/components/contact-forms";
 export const dynamic = "force-dynamic";
 import { Brand } from "@/components/brand";
 import { SiteHeader } from "@/components/site-header";
 import { WorkflowExplorer } from "@/components/workflow-explorer";
-import { Planner } from "@/components/planner";
 
 export default async function Home() {
   const brand = await getBrand();
@@ -473,13 +472,7 @@ export default async function Home() {
                 </div>
               </div>
             </div>
-            <div className="contact-forms">
-              <EnquiryForm brand={brand} />
-              <details className="planner-disclosure">
-                <summary>Just exploring? Try the quick planning guide.</summary>
-                <Planner brand={brand} />
-              </details>
-            </div>
+            <ContactForms brand={brand} />
           </div>
         </section>
       </main>

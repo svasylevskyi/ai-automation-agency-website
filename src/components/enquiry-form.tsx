@@ -1,10 +1,32 @@
 "use client";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type RefObject,
+} from "react";
 import type { PublicBrand } from "@/server/settings";
-import { areas } from "@/lib/planner";
+import { areas, teamSizes } from "@/lib/planner";
+import { recommendAssessment, type AssessmentAnswers } from "@/lib/assessment";
+import { AssessmentSummary, Recommendation } from "./assessment-summary";
 import { Arrow } from "./arrow";
 
-export function EnquiryForm({ brand }: { brand: PublicBrand }) {
+export function EnquiryForm({
+  brand,
+  assessment,
+  headingRef,
+  onEditAssessment,
+  onRemoveAssessment,
+  onSent,
+}: {
+  brand: PublicBrand;
+  assessment: AssessmentAnswers | null;
+  headingRef: RefObject<HTMLHeadingElement | null>;
+  onEditAssessment: () => void;
+  onRemoveAssessment: () => void;
+  onSent: () => void;
+}) {
   const [token, setToken] = useState("");
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState("");
@@ -40,8 +62,9 @@ export function EnquiryForm({ brand }: { brand: PublicBrand }) {
           name: form.get("name"),
           email: form.get("email"),
           company: form.get("company"),
-          area: form.get("area"),
-          teamSize: form.get("teamSize"),
+          area: assessment?.area ?? form.get("area"),
+          teamSize: assessment?.teamSize ?? form.get("teamSize"),
+          assessment: assessment ?? undefined,
           message: form.get("message"),
           privacyAcknowledged: form.get("privacyAcknowledged") === "on",
           website: form.get("website"),
@@ -54,6 +77,7 @@ export function EnquiryForm({ brand }: { brand: PublicBrand }) {
         throw new Error(data.error);
       }
       setSent(true);
+      onSent();
       setMessage(data.message);
     } catch (error) {
       setMessage(
@@ -74,7 +98,9 @@ export function EnquiryForm({ brand }: { brand: PublicBrand }) {
     ) : null;
   return (
     <div className="enquiry-card">
-      <h3>Let’s start with your workflow.</h3>
+      <h3 ref={headingRef} tabIndex={-1}>
+        Let’s start with your workflow.
+      </h3>
       <p>
         Tell us what takes too much time. We’ll use your details to reply about
         your enquiry.
@@ -94,6 +120,41 @@ export function EnquiryForm({ brand }: { brand: PublicBrand }) {
         </div>
       ) : (
         <form onSubmit={submit}>
+          {assessment && (
+            <section
+              className="attached-assessment"
+              aria-labelledby="attached-title"
+            >
+              <h4 id="attached-title">Your assessment is attached</h4>
+              <p>
+                Review the details below. They will be sent with your enquiry.
+              </p>
+              <AssessmentSummary answers={assessment} />
+              <details className="assessment-review">
+                <summary>Your recommendation</summary>
+                <Recommendation result={recommendAssessment(assessment)} />
+              </details>
+              <div className="assessment-actions">
+                <button
+                  type="button"
+                  className="text-link"
+                  onClick={onEditAssessment}
+                  disabled={pending}
+                >
+                  Edit assessment
+                </button>
+                <button
+                  type="button"
+                  className="text-link"
+                  onClick={onRemoveAssessment}
+                  disabled={pending}
+                >
+                  Remove assessment
+                </button>
+              </div>
+              {errorFor("assessment")}
+            </section>
+          )}
           <div className="form-grid">
             <label className="field">
               <span>Your name</span>
@@ -128,35 +189,47 @@ export function EnquiryForm({ brand }: { brand: PublicBrand }) {
             </span>
             <input name="company" autoComplete="organization" maxLength={120} />
           </label>
+          {!assessment && (
+            <>
+              <label className="field">
+                <span>Where does work get stuck?</span>
+                <select name="area">
+                  {Object.entries(areas).map(([key, value]) => (
+                    <option value={key} key={key}>
+                      {value}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                <span>Your team</span>
+                <select name="teamSize">
+                  {Object.entries(teamSizes).map(([key, value]) => (
+                    <option value={key} key={key}>
+                      {value}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </>
+          )}
           <label className="field">
-            <span>Where does work get stuck?</span>
-            <select name="area">
-              {Object.entries(areas).map(([key, value]) => (
-                <option value={key} key={key}>
-                  {value}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="field">
-            <span>Your team</span>
-            <select name="teamSize">
-              <option value="small">A small business or growing team</option>
-              <option value="mid">An established medium-sized business</option>
-              <option value="large">
-                A department in a larger organisation
-              </option>
-            </select>
-          </label>
-          <label className="field">
-            <span>What would you like to make easier?</span>
+            <span>
+              {assessment
+                ? "Anything else you’d like us to know? (optional)"
+                : "What would you like to make easier?"}
+            </span>
             <textarea
               name="message"
-              rows={5}
-              required
-              minLength={20}
+              rows={assessment ? 3 : 5}
+              required={!assessment}
+              minLength={assessment ? undefined : 20}
               maxLength={5000}
-              placeholder="The process, tools you use, and where the manual work happens…"
+              placeholder={
+                assessment
+                  ? "Add any extra context…"
+                  : "The process, tools you use, and where the manual work happens…"
+              }
               aria-invalid={!!fields.message}
               aria-describedby={fields.message ? "message-error" : undefined}
             />
@@ -164,8 +237,9 @@ export function EnquiryForm({ brand }: { brand: PublicBrand }) {
           </label>
           <p className="privacy-note" id="enquiry-privacy">
             Please leave out passwords and sensitive client information. Your
-            name, email and message are stored for the agency owner to review
-            and respond. We do not add you to a marketing list.
+            contact details, message and any attached assessment are stored for
+            the agency owner to review and respond. We do not add you to a
+            marketing list.
             {brand.privacyUrl && (
               <>
                 {" "}
