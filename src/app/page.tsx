@@ -1,5 +1,6 @@
 import { getBrand } from "@/server/settings";
 import { ContactForms } from "@/components/contact-forms";
+import { HomeLink } from "@/components/home-link";
 export const dynamic = "force-dynamic";
 import { Brand } from "@/components/brand";
 import { SiteHeader } from "@/components/site-header";
@@ -54,8 +55,7 @@ export default async function Home() {
                   </a>
                 </div>
                 <p className="hero-note">
-                  Founder-led. Built around your business. One useful step at a
-                  time.
+                  Built around your business. One useful step at a time.
                 </p>
               </div>
               <div className="hero-art">
@@ -462,15 +462,6 @@ export default async function Home() {
                 Bring one process that takes too much time. We’ll explore where
                 automation could help and what a sensible first step looks like.
               </p>
-              <div className="founder">
-                <span className="founder-monogram" aria-hidden="true">
-                  {brand.founder.initials}
-                </span>
-                <div>
-                  <strong>{brand.founder.name}</strong>
-                  <small>{brand.founder.detail}</small>
-                </div>
-              </div>
             </div>
             <ContactForms brand={brand} />
           </div>
@@ -485,9 +476,7 @@ export default async function Home() {
           <p>
             Illustrative workflows. Every engagement starts with an assessment.
           </p>
-          <a className="back-to-top" href="#home">
-            Back to top ↑
-          </a>
+          <HomeLink className="back-to-top">Back to top ↑</HomeLink>
         </div>
       </footer>
     </>

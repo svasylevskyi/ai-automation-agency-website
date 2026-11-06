@@ -54,7 +54,7 @@ See [guided assessment behavior, validation and review steps](docs/guided-assess
 
 Open **Owner area → Settings** to update the agency name, tagline, search/sharing description, logo, public email, booking URL and privacy notice URL. These changes apply on the next page load without a rebuild. Logos are limited to 2 MB PNG/JPEG/WebP, decoded and re-encoded as PNG, and stored in PostgreSQL; SVG uploads are rejected. Save settings after upload to publish the logo. A checkbox supports logos that already include the agency name.
 
-[`src/config/brand.ts`](src/config/brand.ts) supplies initial defaults and founder details. Once migrated, database settings are authoritative; editing those defaults will not overwrite saved settings. Original drafts retain their historical identity. The public email and server-side notification recipient are separate settings.
+[`src/config/brand.ts`](src/config/brand.ts) supplies initial branding defaults. Once migrated, database settings are authoritative; editing those defaults will not overwrite saved settings. Original drafts retain their historical identity. The public email and server-side notification recipient are separate settings.
 
 ## Structure
 

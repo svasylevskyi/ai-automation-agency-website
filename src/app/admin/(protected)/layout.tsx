@@ -21,8 +21,9 @@ export default async function ProtectedLayout({
           <Link href="/admin">Enquiries</Link>
           <Link href="/admin/settings">Settings</Link>
           <Link href="/admin/account">Account</Link>
-          <a href="/">
+          <a href="/" target="_blank" rel="noopener noreferrer">
             View website <Arrow />
+            <span className="sr-only"> (opens in a new tab)</span>
           </a>
           <SignOut />
         </nav>

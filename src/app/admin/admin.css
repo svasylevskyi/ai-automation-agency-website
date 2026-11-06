@@ -321,7 +321,8 @@
 }
 
 .login-form > .button,
-.password-form > .button {
+.password-form > .button,
+.follow-up-form > .button {
   margin-top: 24px;
 }
 .password-form {

@@ -1,4 +1,5 @@
 import type { PublicBrand } from "@/server/settings";
+import { HomeLink } from "./home-link";
 
 /** A replaceable mark plus a wrapping wordmark; no initials baked into the layout. */
 export function Brand({
@@ -9,9 +10,8 @@ export function Brand({
   footer?: boolean;
 }) {
   return (
-    <a
+    <HomeLink
       className={`brand${footer ? " brand-footer" : ""}`}
-      href="/#home"
       aria-label={`${brand.name} home`}
     >
       <img
@@ -22,6 +22,6 @@ export function Brand({
         alt=""
       />
       {brand.logo.showName && <span className="brand-name">{brand.name}</span>}
-    </a>
+    </HomeLink>
   );
 }
