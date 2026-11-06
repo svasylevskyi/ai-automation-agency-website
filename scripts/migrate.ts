@@ -4,6 +4,7 @@ import { getMigrations } from "better-auth/db/migration";
 import { authOptions } from "../src/server/auth";
 import { db } from "../src/server/db";
 import { defaultSettings } from "../src/server/settings";
+import { legalPages, legalSlugs } from "../src/lib/legal";
 
 const client = await db().connect();
 try {
@@ -50,6 +51,17 @@ try {
     "INSERT INTO site_settings (singleton, data) VALUES (true,$1) ON CONFLICT DO NOTHING",
     [JSON.stringify(defaultSettings)],
   );
+  for (const slug of legalSlugs) {
+    const page = legalPages[slug];
+    const content = await readFile(
+      new URL(`../src/content/${page.file}`, import.meta.url),
+      "utf8",
+    );
+    await client.query(
+      "INSERT INTO legal_pages (slug,title,content) VALUES ($1,$2,$3) ON CONFLICT (slug) DO NOTHING",
+      [slug, page.title, content],
+    );
+  }
   console.log(
     "Database ready. Existing enquiries, owner and settings are preserved.",
   );

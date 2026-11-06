@@ -31,10 +31,12 @@ export function Planner({
   onDiscuss,
   onSkip,
   editRequest,
+  privacyUrl,
 }: {
   onDiscuss: (answers: AssessmentAnswers) => void;
   onSkip: () => void;
   editRequest: number;
+  privacyUrl: string;
 }) {
   const [draft, setDraft] = useState(initialDraft);
   const [step, setStep] = useState(0);
@@ -109,6 +111,17 @@ export function Planner({
       <p>
         Three short steps to explore an opportunity. No contact details needed
         to see your recommendation.
+      </p>
+      <p className="privacy-note">
+        See the{" "}
+        <a href="/terms" target="_blank" rel="noopener noreferrer">
+          Website Terms<span className="sr-only"> (opens in a new tab)</span>
+        </a>{" "}
+        and{" "}
+        <a href={privacyUrl} target="_blank" rel="noopener noreferrer">
+          Privacy Policy<span className="sr-only"> (opens in a new tab)</span>
+        </a>{" "}
+        before using the guide.
       </p>
       {result ? (
         <div

@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     const id = randomUUID();
     const result = await db().query(
       `INSERT INTO enquiries (id,submission_id,name,email,company,area,team_size,message,privacy_notice_version,assessment)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'enquiry-v2',$9) ON CONFLICT (submission_id) DO NOTHING RETURNING id`,
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'enquiry-v3',$9) ON CONFLICT (submission_id) DO NOTHING RETURNING id`,
       [
         id,
         submissionId,

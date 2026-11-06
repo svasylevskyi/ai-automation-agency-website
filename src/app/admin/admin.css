@@ -328,3 +328,40 @@
 .password-form {
   max-width: 620px;
 }
+
+.legal-editors {
+  display: grid;
+  gap: 28px;
+  max-width: 900px;
+  margin-top: 32px;
+}
+.legal-editor fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.legal-editor textarea {
+  font-family: ui-monospace, monospace;
+  font-size: 0.86rem;
+  line-height: 1.6;
+}
+.legal-editor .notice {
+  overflow-wrap: anywhere;
+}
+.legal-editor fieldset > .button {
+  margin-top: 24px;
+}
+.legal-preview {
+  margin-top: 24px;
+  border: 1px solid #ddd5eb;
+  border-radius: 12px;
+  padding: 16px;
+}
+.legal-preview summary {
+  cursor: pointer;
+  padding: 10px 0;
+}
+.legal-preview h3 {
+  margin-top: 20px;
+}

@@ -1,8 +1,7 @@
 import { getBrand } from "@/server/settings";
 import { ContactForms } from "@/components/contact-forms";
-import { HomeLink } from "@/components/home-link";
+import { SiteFooter } from "@/components/site-footer";
 export const dynamic = "force-dynamic";
-import { Brand } from "@/components/brand";
 import { SiteHeader } from "@/components/site-header";
 import { WorkflowExplorer } from "@/components/workflow-explorer";
 
@@ -467,18 +466,7 @@ export default async function Home() {
           </div>
         </section>
       </main>
-      <footer className="site-footer">
-        <div className="wrap footer-inner">
-          <div>
-            <Brand brand={brand} footer />
-            <p>Practical AI automation. Built around your business.</p>
-          </div>
-          <p>
-            Illustrative workflows. Every engagement starts with an assessment.
-          </p>
-          <HomeLink className="back-to-top">Back to top ↑</HomeLink>
-        </div>
-      </footer>
+      <SiteFooter brand={brand} home />
     </>
   );
 }
