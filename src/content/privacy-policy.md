@@ -40,7 +40,7 @@ The form's “I’ve read how my enquiry details will be used” checkbox record
 
 ## 6. Who can receive the data
 
-The agency owner accesses enquiries in the protected inbox. Hosting and infrastructure suppliers may process website data on our instructions to run, secure and back up the service. The current test site is hosted with Hetzner; the final supplier and data-location details are [HOSTING_ENTITY_AND_LOCATION].
+The agency owner accesses enquiries in the protected inbox. Hosting and infrastructure suppliers may process website data on our instructions to run, secure and back up the service. The current test site is hosted with Hetzner; the final supplier and data-location details are [HOSTING_ENTITY_AND_LOCATION]. Encrypted off-server backups can be stored with Cloudflare R2 in an EU-jurisdiction bucket when configured. Confirm the actual backup supplier entity and location: [BACKUP_PROVIDER_ENTITY_AND_LOCATION].
 
 Owner notifications contain a private inbox link, not your message, assessment or contact details. We also send a short automatic confirmation to the email address supplied with a new enquiry. It contains general next steps and an optional booking link, without copying your name, message or assessment. The mail service processes the recipient address and delivery metadata to handle that email. In the current test environment, both types of email are captured locally on the server. The provider used for live confirmations and direct correspondence must be identified before live use: [CORRESPONDENCE_PROVIDER_AND_LOCATION].
 
@@ -56,12 +56,13 @@ If you follow an optional booking link or email us using your own email applicat
 
 We keep data only for a defined purpose and review whether it is still needed. The final operating retention schedule must be confirmed and implemented before this draft is marked ready:
 
-- Unsuccessful or completed enquiries, follow-up notes, actions, activity history and email-attempt records: [ENQUIRY_RETENTION_PERIOD_OR_CRITERIA], measured from the last meaningful contact or closure of the enquiry.
+- Unsuccessful or completed enquiries, follow-up notes, actions, activity history and email-attempt records: [ENQUIRY_RETENTION_PERIOD_OR_CRITERIA], measured from closure or the latest saved owner edit, whichever is later. Open enquiries remain subject to regular owner review.
 - If an enquiry becomes client work, necessary records move into the retention arrangements for that engagement. Statutory records and information required for active legal claims are kept for the applicable legal period or while the claim requires them.
 - Hosting and security logs: [LOG_RETENTION_PERIOD_OR_CRITERIA]. Form rate-limit entries expire after their short protection windows and are removed by scheduled maintenance; expired owner sessions are also cleaned up.
-- Backups and recovery copies: [BACKUP_RETENTION_PERIOD_OR_CRITERIA]. A record deleted from the active inbox may remain in a protected backup until that backup expires. If a backup is restored, relevant deletion requests must be reapplied.
+- Backups and recovery copies: [BACKUP_RETENTION_PERIOD_OR_CRITERIA]. A record deleted from the active inbox may remain in a protected backup until that backup expires. Rolling backup windows can retain copies longer if jobs fail or a final good recovery copy must be preserved. If a backup is restored, known deletions must be reapplied before access is restored. Minimal recovery records containing only random enquiry identifiers and deletion times are kept until older managed backups that could reintroduce those enquiries have expired.
+- Captured test emails and later direct correspondence: [EMAIL_RETENTION_PERIOD_OR_CRITERIA]. Inbox deletion does not recall or delete email copies.
 
-The current test build supports manual enquiry deletion but does not automatically delete old enquiries or rotate database backups. Setting a period in this notice does not by itself configure deletion. The owner must align the operational process with the final retention schedule.
+The website supports manual enquiry deletion and optional automatic deletion of eligible closed enquiries, disabled until the owner configures it. Backup rotation requires separate server setup and successful recovery checks. Setting a period in this notice does not by itself configure either process. The owner must align the operational settings and review process with the final retention schedule.
 
 ## 9. Your rights and how to use them
 

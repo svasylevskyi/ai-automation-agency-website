@@ -249,29 +249,11 @@ journalctl -u agency-backup -n 40 --no-pager
 curl -fsS https://agency.example.com/api/health
 ```
 
-Maintenance retries pending/failed email and cleans expired limits/sessions every five minutes. Database backups run daily around 02:30 UTC and before every deployment, in PostgreSQL custom format under `/var/lib/postgresql/agency-backups`. Each dump's catalogue is checked. A failed pre-deploy backup blocks the deployment.
+Maintenance retries pending/failed email, cleans expired limits/sessions, and applies enabled closed-enquiry retention every five minutes. Database backups run daily around 02:30 UTC and before every deployment, in PostgreSQL custom format under `/var/lib/postgresql/agency-backups`. Each dump's catalogue is checked. A failed pre-deploy backup blocks the deployment.
 
-**Local dumps alone do not cover server loss.** Copy encrypted backups off the server (for example to a separately secured backup destination), include an encrypted copy of `/etc/agency/site.env`, and perform a restore drill before accepting important enquiries. This increment does not configure an off-server destination. Backups and old releases are retained, with no automatic deletion; review disk usage and set retention after off-server copies are verified:
+**Local dumps alone do not cover server loss.** Follow [the R2 backup and retention setup](r2-backup-setup.md) to install encrypted off-server backups, bounded local retention, hourly deletion checkpoints and weekly isolated recovery checks. Backup rotation is disabled until that setup is completed. Old application releases still require separate disk-space review.
 
-```bash
-df -h /
-du -sh /srv/agency/releases /var/lib/postgresql/agency-backups
-```
-
-For a restore drill, choose an actual dump path, restore to a **new** database, and inspect the data before touching production:
-
-```bash
-sudo -u postgres createdb --owner=agency agency_restore_check
-sudo -u postgres pg_restore --exit-on-error --no-owner --role=agency \
-  --dbname=agency_restore_check /var/lib/postgresql/agency-backups/CHOSEN_BACKUP.dump
-sudo -u postgres psql -d agency_restore_check -c 'SELECT count(*) FROM enquiries;'
-```
-
-Restoring the live database loses writes after the backup. Stop the website and maintenance timer, take a fresh backup, decide which enquiries need recovery, and plan a compatible application/schema restore first. Automatic application rollback assumes schema changes remain backward compatible. Review migrations for that property in future PRs.
-
-To roll back code deliberately, revert the problematic commit with a new PR and deploy `main` again. Do not delete the active release or blindly run old migrations. A failed release directory can be inspected; a GitHub rerun gets a new release ID. If the workflow is interrupted during a deploy, inspect `readlink -f /srv/agency/current`, `/api/health` and the journal before rerunning. Server helper changes need a repeat of step 3, while environment changes need `systemctl restart agency-web`.
-
-Keep Ubuntu, PostgreSQL, Caddy and Node security updates current. Resolve disk/backup/SMTP failures promptly. Keep `INDEX_SITE=false` until your domain, public contact details, booking/privacy links and enquiry delivery are ready; restart the app after changing it.
+Use the recovery procedure in that guide. A standalone database restore without the latest deletion checkpoint can reintroduce enquiries removed after the backup. The helper restores to an isolated database and replays deletion evidence before any operator-controlled promotion; it never replaces the live database automatically.
 
 ## Reference documentation
 

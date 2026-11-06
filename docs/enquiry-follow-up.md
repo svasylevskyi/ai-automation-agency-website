@@ -28,7 +28,7 @@ Both mail channels use database claims. Concurrent workers cannot claim the same
 
 Saving an enquiry and its initial history event is transactional. So are owner edits/history and mail-state/history updates. SMTP delivery is separate: a crash after acceptance but before the database update can cause a duplicate on recovery, despite a stable Message-ID. A receipt's address comes from the submitted email; it is not independently verified. Existing origin, honeypot, challenge and submission/email rate limits remain in force, and the body never reflects untrusted enquiry text.
 
-Deleting an enquiry removes its action, receipt snapshot and activity rows from the active database. It does not recall email already in flight/accepted, remove Mailpit messages or erase backups. Apply the agreed retention process to those stores separately.
+Deleting an enquiry removes its action, receipt snapshot and activity rows from the active database. It does not recall email already in flight/accepted, remove Mailpit messages or erase backups. Apply the agreed retention process to those stores separately. [Retention and R2 recovery](r2-backup-setup.md) now provide optional closed-enquiry expiry and minimal deletion checkpoints for recovery.
 
 ## Migration and deployment
 

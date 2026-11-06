@@ -1,0 +1,10 @@
+[Unit]
+Description=Encrypted agency backup to R2
+
+[Timer]
+OnCalendar=*-*-* 03:00:00 UTC
+RandomizedDelaySec=5min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

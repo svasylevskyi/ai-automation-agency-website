@@ -1,0 +1,10 @@
+[Unit]
+Description=Apply verified agency backup retention
+
+[Timer]
+OnCalendar=*-*-* 05:00:00 UTC
+RandomizedDelaySec=5min
+Persistent=true
+
+[Install]
+WantedBy=timers.target
