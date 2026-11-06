@@ -18,6 +18,8 @@ const schema = z.object({
   SMTP_FROM: z.email().default("website@example.test"),
   NOTIFICATION_EMAIL: z.email().default("owner@example.test"),
   INDEX_SITE: z.enum(["true", "false"]).default("false"),
+  PROSPECT_AUTOMATION_ENABLED: z.enum(["true", "false"]).default("false"),
+  PROSPECT_AUTOMATION_TOKEN: z.string().max(128).default(""),
   TRUSTED_IP_HEADER: z
     .string()
     .regex(/^[a-z0-9-]*$/)
@@ -31,6 +33,13 @@ export function env() {
       `Invalid configuration: ${result.error.issues.map((i) => i.path.join(".")).join(", ")}. See .env.example.`,
     );
   const url = new URL(result.data.APP_URL);
+  if (
+    result.data.PROSPECT_AUTOMATION_ENABLED === "true" &&
+    !/^[A-Za-z0-9_-]{43,128}$/.test(result.data.PROSPECT_AUTOMATION_TOKEN)
+  )
+    throw new Error(
+      "Set a unique random PROSPECT_AUTOMATION_TOKEN before enabling prospect automation.",
+    );
   if (
     url.pathname !== "/" ||
     url.search ||

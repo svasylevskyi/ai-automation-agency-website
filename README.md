@@ -56,6 +56,10 @@ Admin opens on **Needs attention**, showing new enquiries and actions due today 
 
 See [follow-up behavior, mail recovery and deployment review](docs/enquiry-follow-up.md).
 
+## Prospect assistant
+
+The optional **[n8n prospect assistant](docs/prospect-assistant-setup.md)** adds a reliable queue, rule-based brief and reply draft to each enquiry's admin page. Replies remain under owner control. The guide includes a Windows pilot without Docker and an importable workflow; the integration is disabled by default.
+
 ## Branding and settings
 
 Open **Owner area → Settings** to update the agency name, tagline, search/sharing description, logo, public email, booking URL and optional custom Privacy Policy URL. These changes apply on the next page load without a rebuild. Logos are limited to 2 MB PNG/JPEG/WebP, decoded and re-encoded as PNG, and stored in PostgreSQL; SVG uploads are rejected. Save settings after upload to publish the logo. A checkbox supports logos that already include the agency name.

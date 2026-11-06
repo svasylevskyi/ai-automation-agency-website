@@ -5,6 +5,8 @@ import { db } from "@/server/db";
 import { requireOwner } from "@/server/owner-page";
 import { EnquiryEditor } from "@/components/enquiry-editor";
 import { EnquiryActivity } from "@/components/enquiry-activity";
+import { ProspectAssistant } from "@/components/prospect-assistant";
+import { getProspectJob, prospectEnabled } from "@/server/prospect";
 import {
   AssessmentSummary,
   Recommendation,
@@ -102,6 +104,13 @@ export default async function Enquiry({
           confirmationAttempts={item.confirmation_attempts}
         />
       </div>
+      <ProspectAssistant
+        id={item.id}
+        version={item.version}
+        closed={item.status === "closed"}
+        enabled={prospectEnabled()}
+        job={await getProspectJob(item.id)}
+      />
       <EnquiryActivity
         id={item.id}
         requestedPage={(await searchParams).activityPage}
