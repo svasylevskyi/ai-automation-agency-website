@@ -850,35 +850,6 @@
     margin-top: 25px;
     max-width: 400px;
   }
-  .founder {
-    margin-top: 33px;
-    padding-top: 24px;
-    border-top: 1px solid var(--line);
-    display: flex;
-    gap: 15px;
-    align-items: center;
-  }
-  .founder-monogram {
-    height: 44px;
-    width: 44px;
-    flex-shrink: 0;
-    border: 1px solid var(--line-strong);
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    font-family: monospace;
-    font-size: 0.8rem;
-  }
-  .founder strong {
-    display: block;
-    font-weight: 550;
-    font-size: 0.86rem;
-  }
-  .founder small {
-    display: block;
-    color: var(--muted);
-    font-size: 0.75rem;
-  }
   .planner {
     padding: 32px;
     border: 1px solid white;

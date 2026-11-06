@@ -11,11 +11,6 @@ export const brand = {
     showName: true,
   },
   icon: "/brand/placeholder-mark.svg",
-  founder: {
-    name: "Stepan Vasylevskyi",
-    initials: "SV",
-    detail: "Founder-led delivery · Based in Poland",
-  },
   // Public business details only. Leave unset until the owner supplies them.
   contactEmail: "",
   bookingUrl: "",

@@ -142,7 +142,7 @@ export function EnquiryEditor({
   return (
     <div className="admin-card">
       <h2>Follow-up</h2>
-      <form onSubmit={save}>
+      <form className="follow-up-form" onSubmit={save}>
         <label className="field">
           <span>Status</span>
           <select name="status" defaultValue={status}>
