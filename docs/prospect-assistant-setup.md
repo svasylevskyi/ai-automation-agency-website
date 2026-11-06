@@ -14,6 +14,8 @@ Pull the merged `main` branch into your Windows checkout for the `automation/` f
 
 **Already have n8n?** Use that instance and skip the local startup. Both n8n Cloud and self-hosted n8n can make the outbound HTTPS calls. Keep the workflow private. The export was tested with **n8n 2.46.6**, the stable version checked on 6 November 2026.
 
+**Cloud execution allowance:** the one-minute schedule is intended for self-hosted n8n. Running continuously makes about **43,200 executions per 30 days**, including empty-queue checks. n8n Cloud meters scheduled runs; do not publish this interval there without checking your [plan allowance](https://n8n.io/pricing/). For a small Cloud pilot, use manual execution, or change the Schedule Trigger to 30 minutes (about 1,440 scheduled runs per 30 days, with longer processing/retry delays) before publishing. An event-triggered handoff would be a separate enhancement.
+
 **For this synthetic-data pilot, Windows needs no Docker or additional server.** The website stays on Hetzner; n8n runs while your computer and terminal are on. No inbound webhook, public n8n address or port forwarding is needed. Permanent hosting can follow after validating the process.
 
 With Node.js 24 installed, run from PowerShell in the repository root:
