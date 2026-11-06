@@ -1,5 +1,7 @@
 # Live enquiries and owner workspace
 
+See [enquiry follow-up](enquiry-follow-up.md) for the current receipt emails, action/date controls, Needs attention view, activity history and bounded recovery behavior. The verification counts below describe the original inbox increment.
+
 ## Result and scope
 
 The Orbit website now accepts and stores enquiries. A sole owner can sign in, review a paginated/filterable inbox, update statuses and private notes, delete an enquiry deliberately, retry failed email notifications, and change the public name/logo/contact details. Drafts are untouched. No hosting or DNS changes are included.
@@ -31,10 +33,10 @@ The website has moved from static export to a Next.js Node server with PostgreSQ
 
 - PostgreSQL stores enquiries, owner/session data, settings and logo bytes. Persist and back up the database; no upload folder needs separate backup.
 - Versioned app migrations have checksums and advisory locks. Better Auth's schema migration runs programmatically from the pinned dependency. Review generated/schema changes before any future auth upgrade.
-- The current notification mechanism uses post-response processing with stored status and recovery, not a separate worker queue. Run maintenance periodically in production for recovery and expired limit/session cleanup.
+- The current notification mechanism uses post-response processing with stored status and recovery, not a separate worker queue. The Hetzner timer runs maintenance every five minutes for recovery and expired limit/session cleanup; recovery now covers both owner notifications and visitor receipts with bounded attempts.
 - Only one owner is supported. No roles, CRM sync, bulk export, editorial CMS, analytics or owner email-change UI is included.
 - Old uploaded logos are retained, which avoids breaking existing immutable URLs. They are public assets; only upload public branding.
-- The form includes a concise explanation of enquiry data use and an optional privacy-notice link. Final business identity, public contact information, retention policy and full privacy notice remain launch preparation work.
+- The form includes an enquiry data-use explanation and links to editable Privacy Policy and Website Terms pages. Final business identity, public contact information and operational retention decisions remain launch preparation work.
 - Pagination is 20 enquiries per page. Delivery timestamps are displayed in Europe/Warsaw.
 
 ## Verification

@@ -116,7 +116,9 @@ export function EnquiryForm({
           <strong>{message}</strong>
           <p>
             No need to send it again. We’ll review the context before getting in
-            touch.
+            touch. A confirmation email should arrive shortly. Your enquiry is
+            saved even if you do not receive it. This does not book or purchase
+            services.
           </p>
         </div>
       ) : (
@@ -240,7 +242,8 @@ export function EnquiryForm({
             Please leave out passwords and sensitive client information. Your
             contact details, message and any attached assessment are stored for
             the agency owner to review and respond. We do not add you to a
-            marketing list.{" "}
+            marketing list. We also send a short receipt to your email address
+            without including your message or assessment.{" "}
             <a
               href={privacyHref(brand.privacyUrl)}
               target="_blank"

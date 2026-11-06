@@ -1,7 +1,7 @@
 "use client";
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { statuses, type SiteSettings } from "@/lib/validation";
+import { type SiteSettings } from "@/lib/validation";
 
 async function request(url: string, method: string, data?: unknown) {
   const response = await fetch(url, {
@@ -98,137 +98,6 @@ export function SignOut() {
         Sign out
       </button>
       <span role="alert">{error}</span>
-    </div>
-  );
-}
-export function EnquiryEditor({
-  id,
-  status,
-  notes,
-  version,
-  notification,
-}: {
-  id: string;
-  status: string;
-  notes: string;
-  version: number;
-  notification: string;
-}) {
-  const router = useRouter();
-  const [message, setMessage] = useState("");
-  const [pending, setPending] = useState(false);
-  const [currentVersion, setVersion] = useState(version);
-  const [delivery, setDelivery] = useState(notification);
-  async function save(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    setPending(true);
-    setMessage("");
-    try {
-      const result = await request(`/api/admin/enquiries/${id}`, "PATCH", {
-        status: data.get("status"),
-        notes: data.get("notes"),
-        version: currentVersion,
-      });
-      setVersion(result.version);
-      setMessage("Changes saved.");
-      router.refresh();
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Save failed.");
-    } finally {
-      setPending(false);
-    }
-  }
-  return (
-    <div className="admin-card">
-      <h2>Follow-up</h2>
-      <form className="follow-up-form" onSubmit={save}>
-        <label className="field">
-          <span>Status</span>
-          <select name="status" defaultValue={status}>
-            {Object.entries(statuses).map(([key, value]) => (
-              <option key={key} value={key}>
-                {value}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="field">
-          <span>Private notes</span>
-          <textarea
-            name="notes"
-            defaultValue={notes}
-            rows={7}
-            maxLength={10000}
-            placeholder="Next step, context, or a reminder for your follow-up…"
-          />
-        </label>
-        <button className="button" disabled={pending}>
-          Save changes
-        </button>
-      </form>
-      <p role="status">{message}</p>
-      <hr />
-      <p>
-        Notification email: <strong>{delivery}</strong>
-      </p>
-      {delivery !== "sent" && (
-        <button
-          className="button secondary"
-          disabled={pending}
-          onClick={async () => {
-            setPending(true);
-            try {
-              const result = await request(
-                `/api/admin/enquiries/${id}/notification`,
-                "POST",
-                {},
-              );
-              setDelivery(result.status);
-              setMessage(
-                result.status === "sent"
-                  ? "Notification sent."
-                  : "Notification is not sent yet. Check mail settings or retry later.",
-              );
-            } catch (e) {
-              setMessage(e instanceof Error ? e.message : "Retry failed.");
-            } finally {
-              setPending(false);
-            }
-          }}
-        >
-          Retry notification
-        </button>
-      )}
-      <details className="danger-zone">
-        <summary>Delete enquiry</summary>
-        <p>Permanently removes this message and your notes from the inbox.</p>
-        <button
-          className="button danger"
-          disabled={pending}
-          onClick={async () => {
-            if (
-              !window.confirm(
-                "Permanently delete this enquiry and its notes? This cannot be undone.",
-              )
-            )
-              return;
-            setPending(true);
-            try {
-              await request(`/api/admin/enquiries/${id}`, "DELETE", {
-                version: currentVersion,
-              });
-              router.push("/admin");
-              router.refresh();
-            } catch (e) {
-              setMessage(e instanceof Error ? e.message : "Delete failed.");
-              setPending(false);
-            }
-          }}
-        >
-          Delete permanently
-        </button>
-      </details>
     </div>
   );
 }
@@ -383,7 +252,8 @@ export function SettingsForm({
         <small>
           Shown beside the enquiry form for questions about personal data, and
           as an email fallback if JavaScript is unavailable. Opens the visitor’s
-          email application. This does not change the notification recipient.
+          email application. Also used as the reply-to address for new visitor
+          confirmation emails. This does not change the notification recipient.
         </small>
       </label>
       <label className="field">

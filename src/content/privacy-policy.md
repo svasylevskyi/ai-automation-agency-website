@@ -10,7 +10,7 @@ For privacy questions or requests, contact [PRIVACY_CONTACT_EMAIL] or write to t
 
 When you send an enquiry, we receive your name, email address, optional company name, workflow category, team size and message. If you attach an assessment, we also receive the task description you supplied, current tools, task frequency, main difficulty, desired outcome, timing and the recommendation shown to you.
 
-We record the submission time and the version of the short enquiry data-use explanation you acknowledged. The owner may add private follow-up notes and a status to manage the conversation. Please share only information needed to understand your enquiry. Do not include passwords, access credentials, special-category personal data or confidential information about clients or other people.
+We record the submission time and the version of the short enquiry data-use explanation you acknowledged. The owner may add private notes, a status, a next action and a follow-up date to manage the conversation. We keep an activity history of status changes, scheduled, changed, cleared or completed actions, note-update times, and email attempts and outcomes. Previous private-note text is not copied into that history. Confirmation-email wording is saved with the enquiry so retries use the same receipt. Please share only information needed to understand your enquiry. Do not include passwords, access credentials, special-category personal data or confidential information about clients or other people.
 
 Name and email are needed to receive and reply to an enquiry. A direct enquiry needs a short message; a complete attached assessment can supply that context instead. Company details and the optional free-text assessment fields are not required. If you do not supply the required fields, the form cannot be submitted. You can still browse the website and view an assessment result without identifying yourself.
 
@@ -32,7 +32,7 @@ The public website does not currently use advertising trackers or analytics cook
 
 ## 5. Why we process data and the legal bases
 
-Where you ask us to take steps towards a possible contract with you personally, necessary enquiry handling is based on Article 6(1)(b) GDPR. Where you represent a business or make a general enquiry, we rely on Article 6(1)(f): our legitimate interest in understanding requests, communicating with business contacts and managing potential work, balanced against your rights.
+Enquiry handling includes acknowledging receipt, reviewing your request and following up with you. Where you ask us to take steps towards a possible contract with you personally, necessary enquiry handling is based on Article 6(1)(b) GDPR. Where you represent a business or make a general enquiry, we rely on Article 6(1)(f): our legitimate interest in understanding requests, communicating with business contacts and managing potential work, balanced against your rights.
 
 Website delivery, access control and abuse prevention rely on our legitimate interest in operating a secure, reliable service. Keeping necessary records for establishing, exercising or defending legal claims may also rely on legitimate interests. Where a specific legal obligation requires retention or disclosure, Article 6(1)(c) applies to that obligation.
 
@@ -42,7 +42,7 @@ The form's “I’ve read how my enquiry details will be used” checkbox record
 
 The agency owner accesses enquiries in the protected inbox. Hosting and infrastructure suppliers may process website data on our instructions to run, secure and back up the service. The current test site is hosted with Hetzner; the final supplier and data-location details are [HOSTING_ENTITY_AND_LOCATION].
 
-Owner notifications contain a private inbox link, not your message, assessment or contact details. In the current test environment, these notifications are captured locally on the server. Any provider used for direct email correspondence must be identified before live use: [CORRESPONDENCE_PROVIDER_AND_LOCATION].
+Owner notifications contain a private inbox link, not your message, assessment or contact details. We also send a short automatic confirmation to the email address supplied with a new enquiry. It contains general next steps and an optional booking link, without copying your name, message or assessment. The mail service processes the recipient address and delivery metadata to handle that email. In the current test environment, both types of email are captured locally on the server. The provider used for live confirmations and direct correspondence must be identified before live use: [CORRESPONDENCE_PROVIDER_AND_LOCATION].
 
 Professional advisers or public authorities may receive limited information where necessary for advice, a legal obligation or a legal claim. We do not sell enquiry data. Any future access by additional personnel or suppliers must be limited to the work they are authorised to perform.
 
@@ -56,7 +56,7 @@ If you follow an optional booking link or email us using your own email applicat
 
 We keep data only for a defined purpose and review whether it is still needed. The final operating retention schedule must be confirmed and implemented before this draft is marked ready:
 
-- Unsuccessful or completed enquiries and follow-up notes: [ENQUIRY_RETENTION_PERIOD_OR_CRITERIA], measured from the last meaningful contact or closure of the enquiry.
+- Unsuccessful or completed enquiries, follow-up notes, actions, activity history and email-attempt records: [ENQUIRY_RETENTION_PERIOD_OR_CRITERIA], measured from the last meaningful contact or closure of the enquiry.
 - If an enquiry becomes client work, necessary records move into the retention arrangements for that engagement. Statutory records and information required for active legal claims are kept for the applicable legal period or while the claim requires them.
 - Hosting and security logs: [LOG_RETENTION_PERIOD_OR_CRITERIA]. Form rate-limit entries expire after their short protection windows and are removed by scheduled maintenance; expired owner sessions are also cleaned up.
 - Backups and recovery copies: [BACKUP_RETENTION_PERIOD_OR_CRITERIA]. A record deleted from the active inbox may remain in a protected backup until that backup expires. If a backup is restored, relevant deletion requests must be reapplied.

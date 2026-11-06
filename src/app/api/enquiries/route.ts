@@ -2,10 +2,13 @@ import { randomUUID } from "node:crypto";
 import { after } from "next/server";
 import { recommendAssessment } from "@/lib/assessment";
 import { enquirySchema } from "@/lib/validation";
-import { db } from "@/server/db";
+import { db, transaction } from "@/server/db";
 import { apiError, json, readJson, sameOrigin } from "@/server/http";
 import { verifyChallenge, rateLimit, clientKey } from "@/server/spam";
-import { sendNotification } from "@/server/mail";
+import { processEnquiryMail } from "@/server/mail";
+import { getSettings } from "@/server/settings";
+import { confirmationMessage } from "@/lib/confirmation";
+import { recordActivity } from "@/server/activity";
 export async function POST(request: Request) {
   try {
     sameOrigin(request);
@@ -26,36 +29,33 @@ export async function POST(request: Request) {
     await rateLimit(`enquiry:${clientKey(request.headers)}`, 5, 900);
     await rateLimit(`email:${input.email}`, 3, 3600);
     const id = randomUUID();
-    const result = await db().query(
-      `INSERT INTO enquiries (id,submission_id,name,email,company,area,team_size,message,privacy_notice_version,assessment)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'enquiry-v3',$9) ON CONFLICT (submission_id) DO NOTHING RETURNING id`,
-      [
-        id,
-        submissionId,
-        input.name,
-        input.email,
-        input.company,
-        input.area,
-        input.teamSize,
-        input.message,
-        input.assessment
-          ? JSON.stringify({
-              ...input.assessment,
-              recommendation: recommendAssessment(input.assessment),
-            })
-          : null,
-      ],
-    );
-    if (result.rowCount)
-      after(async () => {
-        try {
-          await sendNotification(id);
-        } catch {
-          console.error(
-            "Notification processing interrupted; saved enquiry remains available for retry.",
-          );
-        }
-      });
+    const { settings } = await getSettings();
+    const created = await transaction(async (client) => {
+      const result = await client.query(
+        `INSERT INTO enquiries (id,submission_id,name,email,company,area,team_size,message,privacy_notice_version,assessment,confirmation_status,confirmation_payload)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'enquiry-v4',$9,'pending',$10) ON CONFLICT (submission_id) DO NOTHING RETURNING id`,
+        [
+          id,
+          submissionId,
+          input.name,
+          input.email,
+          input.company,
+          input.area,
+          input.teamSize,
+          input.message,
+          input.assessment
+            ? JSON.stringify({
+                ...input.assessment,
+                recommendation: recommendAssessment(input.assessment),
+              })
+            : null,
+          JSON.stringify(confirmationMessage(settings)),
+        ],
+      );
+      if (result.rowCount) await recordActivity(client, id, "received");
+      return !!result.rowCount;
+    });
+    if (created) after(() => processEnquiryMail(id));
     return accepted();
   } catch (error) {
     return apiError(error);

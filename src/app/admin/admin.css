@@ -365,3 +365,53 @@
 .legal-preview h3 {
   margin-top: 20px;
 }
+
+.enquiry-editor fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.follow-up-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+.complete-follow-up {
+  margin-top: 18px;
+}
+.enquiry-row .next-action {
+  font-size: 0.9rem;
+  margin: 12px 0 0;
+  overflow-wrap: anywhere;
+}
+.follow-up-date {
+  color: #5c3a8a;
+  font-weight: 600;
+}
+.follow-up-date.overdue {
+  color: #963749;
+}
+.activity-card {
+  margin-top: 28px;
+}
+.activity-list {
+  list-style: none;
+  padding: 0;
+  margin: 24px 0 0;
+}
+.activity-list li {
+  border-left: 3px solid #d7cde5;
+  padding: 4px 0 4px 20px;
+  margin: 0 0 20px;
+  overflow-wrap: anywhere;
+}
+.activity-list time {
+  color: #756b83;
+  font-size: 0.8rem;
+}
+.activity-list p {
+  margin: 6px 0;
+  white-space: pre-wrap;
+}

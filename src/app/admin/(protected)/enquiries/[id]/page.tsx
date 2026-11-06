@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/server/db";
 import { requireOwner } from "@/server/owner-page";
-import { EnquiryEditor } from "@/components/admin-forms";
+import { EnquiryEditor } from "@/components/enquiry-editor";
+import { EnquiryActivity } from "@/components/enquiry-activity";
 import {
   AssessmentSummary,
   Recommendation,
@@ -12,15 +13,18 @@ import type { SavedAssessment } from "@/lib/assessment";
 import { areas } from "@/lib/planner";
 export default async function Enquiry({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ activityPage?: string }>;
 }) {
   await requireOwner();
   const id = z.uuid().safeParse((await params).id);
   if (!id.success) notFound();
-  const { rows } = await db().query("SELECT * FROM enquiries WHERE id=$1", [
-    id.data,
-  ]);
+  const { rows } = await db().query(
+    "SELECT *,follow_up_on::text AS due_date FROM enquiries WHERE id=$1",
+    [id.data],
+  );
   const item = rows[0];
   if (!item) notFound();
   const assessment = item.assessment as SavedAssessment | null;
@@ -91,9 +95,17 @@ export default async function Enquiry({
           status={item.status}
           notes={item.notes}
           version={item.version}
+          nextAction={item.next_action}
+          followUpDate={item.due_date}
           notification={item.notification_status}
+          confirmation={item.confirmation_status}
+          confirmationAttempts={item.confirmation_attempts}
         />
       </div>
+      <EnquiryActivity
+        id={item.id}
+        requestedPage={(await searchParams).activityPage}
+      />
     </>
   );
 }
