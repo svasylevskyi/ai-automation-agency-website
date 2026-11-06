@@ -4,6 +4,7 @@ import sharp from "sharp";
 import { db } from "../../src/server/db.ts";
 import { provisionOwner } from "../../src/server/provision.ts";
 import { issueChallenge } from "../../src/server/spam.ts";
+import { recommendAssessment } from "../../src/lib/assessment.ts";
 import { sendNotification } from "../../src/server/mail.ts";
 
 if (!new URL(process.env.DATABASE_URL).pathname.endsWith("_test"))
@@ -153,6 +154,8 @@ try {
   const rows = (await db().query("SELECT * FROM enquiries")).rows;
   assert.equal(rows.length, 1);
   checks++;
+  assert.equal(rows[0].assessment, null);
+  checks++;
   const id = rows[0].id;
   status(
     await call(`/api/admin/enquiries/${id}`, "PATCH", {
@@ -299,6 +302,116 @@ try {
     429,
   );
   status(await call("/api/enquiries", "POST", enquiry), 201);
+  // Complete assessments are private, validated and stored with a server-derived result.
+  await db().query("DELETE FROM request_limits");
+  const assessment = {
+    version: 1,
+    area: "other",
+    teamSize: "mid",
+    tools: "Private scheduling spreadsheet",
+    workflowDescription:
+      '<script>alert("assessment")</script> An unusual recurring task.',
+    frequency: "occasionally",
+    difficulty: "unsure",
+    goal: "accuracy",
+    timing: "exploring",
+  };
+  const assessedEnquiry = {
+    ...enquiry,
+    area: "other",
+    teamSize: "mid",
+    message: "",
+    email: "assessed@example.test",
+    token: issueChallenge(Date.now() - 3000),
+    assessment: {
+      ...assessment,
+      recommendation: { title: "Forged recommendation" },
+    },
+  };
+  for (const invalid of [
+    {
+      ...assessedEnquiry,
+      assessment: { ...assessment, tools: "x".repeat(301) },
+    },
+    { ...assessedEnquiry, assessment: { ...assessment, version: 99 } },
+    { ...assessedEnquiry, assessment: { ...assessment, goal: undefined } },
+    { ...assessedEnquiry, area: "sales" },
+    { ...assessedEnquiry, privacyAcknowledged: false },
+    { ...assessedEnquiry, assessment: undefined },
+  ])
+    status(await call("/api/enquiries", "POST", invalid), 400);
+  status(await call("/api/enquiries", "POST", assessedEnquiry), 201);
+  status(await call("/api/enquiries", "POST", assessedEnquiry), 201);
+  const assessedRows = (
+    await db().query("SELECT * FROM enquiries WHERE email=$1", [
+      assessedEnquiry.email,
+    ])
+  ).rows;
+  assert.equal(assessedRows.length, 1);
+  assert.equal(assessedRows[0].message, "");
+  assert.equal(assessedRows[0].privacy_notice_version, "enquiry-v2");
+  assert.deepEqual(assessedRows[0].assessment, {
+    ...assessment,
+    recommendation: recommendAssessment(assessment),
+  });
+  checks += 4;
+  const assessedId = assessedRows[0].id;
+  status(await call(`/admin/enquiries/${assessedId}`), 307);
+  const assessedDetail = await call(
+    `/admin/enquiries/${assessedId}`,
+    "GET",
+    undefined,
+    true,
+  );
+  status(assessedDetail, 200);
+  const assessmentHtml = await assessedDetail.text();
+  assert.match(assessmentHtml, /Workflow assessment/);
+  assert.match(assessmentHtml, /Private scheduling spreadsheet/);
+  assert.match(assessmentHtml, /Start with a focused workflow review/);
+  assert.match(assessmentHtml, /&lt;script&gt;/);
+  assert.doesNotMatch(assessmentHtml, /<script>alert|Forged recommendation/);
+  assert.doesNotMatch(
+    await (await call("/")).text(),
+    /Private scheduling spreadsheet/,
+  );
+  checks += 6;
+  await sendNotification(assessedId);
+  // The response task may already be sending; wait for the persisted outcome.
+  for (let attempt = 0; attempt < 30; attempt++) {
+    const notification = (
+      await db().query(
+        "SELECT notification_status FROM enquiries WHERE id=$1",
+        [assessedId],
+      )
+    ).rows[0].notification_status;
+    if (notification === "sent") break;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  assert.equal(
+    (
+      await db().query(
+        "SELECT notification_status FROM enquiries WHERE id=$1",
+        [assessedId],
+      )
+    ).rows[0].notification_status,
+    "sent",
+  );
+  checks++;
+  status(
+    await call(
+      `/api/admin/enquiries/${assessedId}`,
+      "DELETE",
+      { version: 1 },
+      true,
+    ),
+    200,
+  );
+  assert.equal(
+    (await db().query("SELECT id FROM enquiries WHERE id=$1", [assessedId]))
+      .rowCount,
+    0,
+  );
+  checks++;
   status(
     await call(`/api/admin/enquiries/${id}`, "DELETE", { version: 1 }, true),
     409,
@@ -414,7 +527,7 @@ try {
     JSON.stringify(saved.data),
   ]);
   console.log(
-    `Passed ${checks} integration assertions: auth, ownership, enquiries, persistence, mail recovery, settings, logos, conflicts, deletion, rate limiting, password changes and session revocation.`,
+    `Passed ${checks} integration assertions: auth, ownership, enquiries, guided assessments, persistence, mail recovery, settings, logos, conflicts, deletion, rate limiting, password changes and session revocation.`,
   );
 } finally {
   await db().end();

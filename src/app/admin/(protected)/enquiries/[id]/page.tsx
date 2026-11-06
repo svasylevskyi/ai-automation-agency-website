@@ -4,6 +4,11 @@ import { z } from "zod";
 import { db } from "@/server/db";
 import { requireOwner } from "@/server/owner-page";
 import { EnquiryEditor } from "@/components/admin-forms";
+import {
+  AssessmentSummary,
+  Recommendation,
+} from "@/components/assessment-summary";
+import type { SavedAssessment } from "@/lib/assessment";
 import { areas } from "@/lib/planner";
 export default async function Enquiry({
   params,
@@ -18,6 +23,7 @@ export default async function Enquiry({
   ]);
   const item = rows[0];
   if (!item) notFound();
+  const assessment = item.assessment as SavedAssessment | null;
   return (
     <>
       <Link className="text-link" href="/admin">
@@ -60,7 +66,20 @@ export default async function Enquiry({
             </dd>
           </dl>
           <h3>Message</h3>
-          <p className="enquiry-message">{item.message}</p>
+          <p className="enquiry-message">
+            {item.message || "No additional message supplied."}
+          </p>
+          {assessment && (
+            <section
+              className="attached-assessment"
+              aria-labelledby="assessment-title"
+            >
+              <h3 id="assessment-title">Workflow assessment</h3>
+              <AssessmentSummary answers={assessment} />
+              <h3>Recommendation shown to the visitor</h3>
+              <Recommendation result={assessment.recommendation} />
+            </section>
+          )}
           <p className="privacy-note">
             Visitor acknowledged enquiry data use ({item.privacy_notice_version}
             ).
