@@ -1,7 +1,8 @@
 "use client";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { prospectStatusLabels, type ProspectJob } from "@/lib/prospect";
+import { ReplyDraftEditor } from "./reply-draft-editor";
 
 export function ProspectAssistant({
   id,
@@ -19,7 +20,6 @@ export function ProspectAssistant({
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [feedback, setFeedback] = useState("");
-  const draft = useRef<HTMLTextAreaElement>(null);
   const canQueue = !job || ["failed", "cancelled"].includes(job.status);
   async function queue() {
     setPending(true);
@@ -92,35 +92,12 @@ export function ProspectAssistant({
           </ul>
           <h3>Suggested next action</h3>
           <p>{job.result.nextAction}</p>
-          <label className="field">
-            <span>Reply draft — review before use</span>
-            <textarea
-              ref={draft}
-              readOnly
-              rows={12}
-              value={job.result.replyDraft}
-            />
-          </label>
-          <button
-            type="button"
-            className="button secondary"
-            onClick={async () => {
-              try {
-                await navigator.clipboard.writeText(job.result!.replyDraft);
-                setFeedback(
-                  "Draft copied. Review and edit it in your email application before sending.",
-                );
-              } catch {
-                draft.current?.focus();
-                draft.current?.select();
-                setFeedback(
-                  "Draft selected. Use Ctrl+C or your device’s copy command.",
-                );
-              }
-            }}
-          >
-            Copy reply draft
-          </button>
+          <ReplyDraftEditor
+            key={id}
+            id={id}
+            original={job.result.replyDraft}
+            review={job.review}
+          />
         </>
       )}
       {closed && (

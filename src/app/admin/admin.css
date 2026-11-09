@@ -372,7 +372,8 @@
   margin: 0;
   min-width: 0;
 }
-.follow-up-buttons {
+.follow-up-buttons,
+.reply-draft-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
@@ -395,6 +396,9 @@
 }
 .prospect-card .field {
   margin-bottom: 1rem;
+}
+.reply-draft-editor > details {
+  margin: 0 0 16px;
 }
 .prospect-card li + li {
   margin-top: 0.5rem;

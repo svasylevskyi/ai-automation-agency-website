@@ -30,6 +30,10 @@ export function describeActivity(kind: string, details: Details) {
       return "Prospect brief queued for n8n. No customer email scheduled.";
     case "prospect_prepared":
       return "Prospect brief and reply draft prepared for owner review. No customer email sent.";
+    case "reply_draft_saved":
+      return "Reply saved as a draft.";
+    case "reply_draft_ready":
+      return "Reply marked ready to send.";
     case "status_changed":
       return `Status: ${statuses[details.from!] ?? details.from} → ${statuses[details.to!] ?? details.to}.`;
     case "notes_updated":
