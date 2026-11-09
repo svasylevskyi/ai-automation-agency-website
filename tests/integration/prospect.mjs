@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
+import { JSDOM } from "jsdom";
 import { prepareProspect } from "../../automation/prospect-rules.mjs";
 
 export async function checkProspect({ call, status, db }) {
@@ -54,7 +55,20 @@ export async function checkProspect({ call, status, db }) {
     version: 0,
   };
   const enquiryUrl = `/api/admin/enquiries/${id}`;
+  const checkInboxBadge = async (expected, view = "view=all") => {
+    const response = await call(`/admin?${view}`, "GET", undefined, true);
+    status(response, 200);
+    const document = new JSDOM(await response.text()).window.document;
+    const row = document.querySelector(
+      `a.enquiry-row[href="/admin/enquiries/${id}"]`,
+    );
+    equal(
+      row?.querySelector(".row-badges span:last-child")?.textContent,
+      expected,
+    );
+  };
   try {
+    await checkInboxBadge("Not processed yet");
     status(await call(ownerUrl, "POST", { version: 1 }), 401);
     status(
       await call(
@@ -68,6 +82,7 @@ export async function checkProspect({ call, status, db }) {
     );
     status(await call(ownerUrl, "POST", { version: 2 }, true), 409);
     status(await call(ownerUrl, "POST", { version: 1 }, true), 200);
+    await checkInboxBadge("Not processed yet");
     status(await call(replyUrl, "PATCH", edit, true), 409);
     equal(
       (
@@ -82,6 +97,7 @@ export async function checkProspect({ call, status, db }) {
     const parallel = await Promise.all([claim(), claim(), claim()]);
     equal(parallel.filter(Boolean).length, 1);
     let job = parallel.find(Boolean);
+    await checkInboxBadge("Not processed yet");
     equal(Object.keys(job.enquiry).sort(), [
       "area",
       "assessment",
@@ -120,13 +136,29 @@ export async function checkProspect({ call, status, db }) {
     checks++;
     status(await worker("complete", prepareProspect(stale)), 409);
     const prepared = prepareProspect(job);
+    prepared.result.replyDraft =
+      "Which deal stages belong in your Friday report?";
+    prepared.result.replySource = "ai";
     prepared.result.brief = '<img src=x onerror="alert(1)">';
+    status(
+      await worker("complete", {
+        ...prepared,
+        result: { ...prepared.result, replySource: "unknown" },
+      }),
+      400,
+    );
     status(await worker("complete", prepared), 200);
+    await checkInboxBadge("Automation processed", "view=attention");
+    await checkInboxBadge("Automation processed", "view=all&status=new");
     status(await worker("complete", prepared), 200);
     status(
       await worker("complete", {
         ...prepared,
-        result: { ...prepared.result, brief: "Replacement must not overwrite" },
+        result: {
+          ...prepared.result,
+          replySource: "rules-fallback",
+          brief: "Replacement must not overwrite",
+        },
       }),
       200,
     );
@@ -166,9 +198,10 @@ export async function checkProspect({ call, status, db }) {
     status(page, 200);
     const html = await page.text();
     assert.match(html, /Draft ready for review/);
+    assert.match(html, /AI-assisted/);
     assert.match(html, /&lt;img/);
     assert.doesNotMatch(html, /<img src=x/);
-    checks += 3;
+    checks += 4;
     status(await call(replyUrl, "PATCH", edit), 401);
     status(
       await call(replyUrl, "PATCH", edit, true, "https://attacker.test"),
@@ -206,8 +239,9 @@ export async function checkProspect({ call, status, db }) {
       await call(`/admin/enquiries/${id}`, "GET", undefined, true)
     ).text();
     assert.match(refreshed, /Ready to send/);
+    assert.match(refreshed, /AI-assisted/);
     assert(refreshed.includes(saved.text));
-    checks += 2;
+    checks += 3;
     equal(
       (
         await db().query(
@@ -277,6 +311,7 @@ export async function checkProspect({ call, status, db }) {
       ).rows[0],
       { status: "failed", attempts: 5 },
     );
+    await checkInboxBadge("Not processed yet");
     status(await call(ownerUrl, "POST", { version: 1 }, true), 200);
     job = await claim();
     status(await worker("complete", prepareProspect(fifth)), 409);
@@ -304,6 +339,7 @@ export async function checkProspect({ call, status, db }) {
       ).rows[0].status,
       "cancelled",
     );
+    await checkInboxBadge("Not processed yet", "view=all&status=closed");
     status(await worker("complete", prepareProspect(job)), 409);
     status(await call(ownerUrl, "POST", { version: 2 }, true), 409);
     equal(await claim(), null);

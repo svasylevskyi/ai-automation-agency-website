@@ -79,8 +79,8 @@ export function ProspectAssistant({
       {job?.result && (
         <>
           <p className="privacy-note">
-            Rule-based preparation · rules-v1 · based on the submitted enquiry,
-            without external research or AI inference.
+            The brief, discovery questions and suggested next action use rules
+            based on the submitted enquiry.
           </p>
           <h3>Prospect brief</h3>
           <p className="enquiry-message">{job.result.brief}</p>
@@ -96,6 +96,7 @@ export function ProspectAssistant({
             key={id}
             id={id}
             original={job.result.replyDraft}
+            source={job.result.replySource}
             review={job.review}
           />
         </>
@@ -121,10 +122,10 @@ export function ProspectAssistant({
       )}
       {job && ["pending", "running", "failed"].includes(job.status) && (
         <p className="privacy-note">
-          n8n checks every minute. Interrupted work is retried after a
-          ten-minute lease, up to five attempts. If this remains waiting, check
-          the published n8n workflow and credentials. You can continue handling
-          the enquiry manually.
+          n8n checks on its configured schedule. Interrupted work is retried
+          after a ten-minute lease, up to five attempts. If this remains
+          waiting, check the published n8n workflow and credentials. You can
+          continue handling the enquiry manually.
         </p>
       )}
       <p role="status">{feedback}</p>

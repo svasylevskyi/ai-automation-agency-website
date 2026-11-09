@@ -1,15 +1,27 @@
 "use client";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { replyDraftLimit, type ReplyReview } from "@/lib/prospect";
+import {
+  replyDraftLimit,
+  type ProspectResult,
+  type ReplyReview,
+} from "@/lib/prospect";
+
+const sourceLabels = {
+  rules: "Rule-based",
+  ai: "AI-assisted",
+  "rules-fallback": "Rule-based fallback",
+};
 
 export function ReplyDraftEditor({
   id,
   original,
+  source = "rules",
   review,
 }: {
   id: string;
   original: string;
+  source?: ProspectResult["replySource"];
   review: ReplyReview;
 }) {
   const router = useRouter();
@@ -88,6 +100,9 @@ export function ReplyDraftEditor({
   return (
     <div className="reply-draft-editor">
       <h3>Reply draft</h3>
+      <p className="privacy-note">
+        Original draft source · {sourceLabels[source]}
+      </p>
       <details>
         <summary>Original n8n draft</summary>
         <p className="enquiry-message">{original}</p>

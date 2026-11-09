@@ -100,6 +100,20 @@ test("copying a draft uses the clipboard only, renders untrusted text safely and
     throw new Error("Copy must not call an API");
   };
   try {
+    for (const [source, label] of [
+      ["ai", "AI-assisted"],
+      ["rules-fallback", "Rule-based fallback"],
+      ["rules", "Rule-based"],
+      [undefined, "Rule-based"],
+    ]) {
+      await render({
+        job: { ...job, result: { ...result, replySource: source } },
+      });
+      assert.equal(
+        document.querySelector(".reply-draft-editor .privacy-note").textContent,
+        `Original draft source · ${label}`,
+      );
+    }
     await render({ job });
     assert.equal(document.querySelector("img"), null);
     assert.equal(button("Prepare brief"), undefined);

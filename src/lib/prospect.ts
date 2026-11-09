@@ -10,7 +10,17 @@ export const prospectResultSchema = z
       .min(1)
       .max(6),
     nextAction: z.string().trim().min(1).max(500),
-    replyDraft: z.string().trim().min(1).max(replyDraftLimit),
+    replyDraft: z
+      .string()
+      .trim()
+      .min(1)
+      .max(replyDraftLimit)
+      .refine(
+        (text) => !text.includes("\0") && text.isWellFormed(),
+        "The reply contains invalid characters.",
+      ),
+    // Older stored results and rules-only workers omit the source.
+    replySource: z.enum(["rules", "ai", "rules-fallback"]).optional(),
   })
   .strict();
 export const prospectCompletionSchema = z
