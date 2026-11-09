@@ -47,6 +47,12 @@ export async function checkProspect({ call, status, db }) {
     [id, randomUUID()],
   );
   const ownerUrl = `/api/admin/enquiries/${id}/prospect`;
+  const replyUrl = ownerUrl + "/reply-draft";
+  const edit = {
+    text: "What triggers the spreadsheet update today?",
+    ready: false,
+    version: 0,
+  };
   const enquiryUrl = `/api/admin/enquiries/${id}`;
   try {
     status(await call(ownerUrl, "POST", { version: 1 }), 401);
@@ -62,6 +68,7 @@ export async function checkProspect({ call, status, db }) {
     );
     status(await call(ownerUrl, "POST", { version: 2 }, true), 409);
     status(await call(ownerUrl, "POST", { version: 1 }, true), 200);
+    status(await call(replyUrl, "PATCH", edit, true), 409);
     equal(
       (
         await db().query(
@@ -162,11 +169,97 @@ export async function checkProspect({ call, status, db }) {
     assert.match(html, /&lt;img/);
     assert.doesNotMatch(html, /<img src=x/);
     checks += 3;
+    status(await call(replyUrl, "PATCH", edit), 401);
+    status(
+      await call(replyUrl, "PATCH", edit, true, "https://attacker.test"),
+      403,
+    );
+    status(await call(replyUrl, "PATCH", { ...edit, text: "   " }, true), 400);
+    status(
+      await call(replyUrl, "PATCH", { ...edit, text: "x".repeat(4001) }, true),
+      400,
+    );
+    const previews = [
+      edit,
+      { ...edit, text: "Which system receives the update?" },
+    ];
+    const responses = await Promise.all(
+      previews.map((body) => call(replyUrl, "PATCH", body, true)),
+    );
+    equal(responses.map((response) => response.status).sort(), [200, 409]);
+    const saved = await responses.find((response) => response.ok).json();
+    equal(saved, {
+      ...previews[responses.findIndex((response) => response.ok)],
+      version: 1,
+    });
+    const ready = { ...saved, ready: true };
+    let updated = await call(replyUrl, "PATCH", ready, true);
+    status(updated, 200);
+    equal(await updated.json(), { ...ready, version: 2 });
+    const replay = await call(replyUrl, "PATCH", ready, true);
+    status(replay, 200);
+    equal(await replay.json(), { ...ready, version: 2 });
+    // Neither a retried worker callback nor a stale owner tab can replace the approved wording.
+    status(await worker("complete", prepared), 200);
+    status(await call(replyUrl, "PATCH", { ...edit, version: 1 }, true), 409);
+    const refreshed = await (
+      await call(`/admin/enquiries/${id}`, "GET", undefined, true)
+    ).text();
+    assert.match(refreshed, /Ready to send/);
+    assert(refreshed.includes(saved.text));
+    checks += 2;
+    equal(
+      (
+        await db().query(
+          "SELECT result->>'replyDraft' AS original,reply_ready,reply_text FROM prospect_jobs WHERE enquiry_id=$1",
+          [id],
+        )
+      ).rows[0],
+      {
+        original: prepared.result.replyDraft,
+        reply_ready: true,
+        reply_text: saved.text,
+      },
+    );
+    updated = await call(
+      replyUrl,
+      "PATCH",
+      { ...edit, text: "Another question", version: 2 },
+      true,
+    );
+    status(updated, 200);
+    equal(await updated.json(), {
+      text: "Another question",
+      ready: false,
+      version: 3,
+    });
+    status(
+      await call(
+        replyUrl,
+        "PATCH",
+        { text: "Another question", ready: false, version: 3 },
+        true,
+      ),
+      200,
+    );
+    equal(
+      (
+        await db().query(
+          "SELECT kind,details FROM enquiry_activity WHERE enquiry_id=$1 AND kind IN ('reply_draft_saved','reply_draft_ready') ORDER BY id",
+          [id],
+        )
+      ).rows,
+      [
+        { kind: "reply_draft_saved", details: {} },
+        { kind: "reply_draft_ready", details: {} },
+        { kind: "reply_draft_saved", details: {} },
+      ],
+    );
     equal(await claim(), null);
     status(await call(ownerUrl, "POST", { version: 1 }, true), 409);
     // Simulate interrupted deliveries through exhaustion, then an explicit owner retry.
     await db().query(
-      "UPDATE prospect_jobs SET status='running',attempts=4,lease_until=now()-interval '1 second',result=NULL,completed_at=NULL WHERE enquiry_id=$1",
+      "UPDATE prospect_jobs SET status='running',attempts=4,lease_until=now()-interval '1 second',result=NULL,completed_at=NULL,reply_text=NULL,reply_ready=false,reply_version=0 WHERE enquiry_id=$1",
       [id],
     );
     const fifth = await claim();
@@ -233,6 +326,7 @@ export async function checkProspect({ call, status, db }) {
     status(await call(ownerUrl, "POST", { version: 3 }, true), 200);
     job = await claim();
     status(await call(enquiryUrl, "DELETE", { version: 3 }, true), 200);
+    status(await call(replyUrl, "PATCH", edit, true), 404);
     status(await worker("complete", prepareProspect(job)), 410);
     equal(
       (

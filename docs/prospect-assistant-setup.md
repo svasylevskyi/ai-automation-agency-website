@@ -10,6 +10,8 @@ Merge the PR, then run **Deploy website to Hetzner** from `main`, as before. Mig
 
 Pull the merged `main` branch into your Windows checkout for the `automation/` files. The website release does not install n8n or import the workflow.
 
+If your workflow is already running, the normal website deployment applies migration `007` and enables reply editing for existing and future prepared enquiries. Open an enquiry in admin to review its draft using your current n8n configuration.
+
 ## 2. Start n8n, or use your existing instance
 
 **Already have n8n?** Use that instance and skip the local startup. Both n8n Cloud and self-hosted n8n can make the outbound HTTPS calls. Keep the workflow private. The export was tested with **n8n 2.46.6**, the stable version checked on 6 November 2026.
@@ -91,7 +93,7 @@ Use synthetic details and an `example.test` email address; this environment stil
 1. Submit an **Other** enquiry with a short recurring-task description, optionally attaching the guided assessment.
 2. Confirm admin saved it and Mailpit received the usual emails. **Prospect assistant** should show **Waiting for n8n**.
 3. Execute n8n once. Refresh the enquiry. Expect **Draft ready for review**, the brief/questions/next action/draft and one preparation activity entry.
-4. Confirm your notes, status and follow-up date are unchanged. Copy and review the draft; replace `[Your name]` before any real use. Do not send this synthetic draft.
+4. Open **Original n8n draft** for comparison. Edit **Your reply**, choose **Save draft**, and reload to check your changes. Choose **Mark ready to send** when satisfied. **Copy reply draft** copies the displayed text to your clipboard for manual use. Saving further edits as a draft returns it to review. Activity history records the save or readiness change without storing the reply text there.
 5. Execute again with no work waiting. No duplicate result, activity or extra email should appear.
 6. Publish/activate the workflow. Submit another synthetic enquiry; its draft normally appears after the next one-minute poll. One job is handled per execution.
 7. Stop/deactivate n8n, submit an enquiry, then restart/reactivate it. The saved enquiry and waiting job should process after it resumes.

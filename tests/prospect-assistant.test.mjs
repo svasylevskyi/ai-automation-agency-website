@@ -85,6 +85,7 @@ test("copying a draft uses the clipboard only, renders untrusted text safely and
     createdAt: "2026-11-06T12:00:00Z",
     completedAt: "2026-11-06T12:01:00Z",
     result,
+    review: { text: null, ready: false, version: 0 },
   };
   let copied;
   Object.defineProperty(navigator, "clipboard", {
@@ -104,14 +105,28 @@ test("copying a draft uses the clipboard only, renders untrusted text safely and
     assert.equal(button("Prepare brief"), undefined);
     await act(async () => button("Copy reply draft").click());
     assert.equal(copied, result.replyDraft);
+    const textarea = document.querySelector("textarea");
+    const revised = "Which deal stages should appear in your Friday report?";
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(
+        HTMLTextAreaElement.prototype,
+        "value",
+      ).set.call(textarea, revised);
+      textarea.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await act(async () => button("Copy reply draft").click());
+    assert.equal(copied, revised);
+    assert.equal(
+      document.querySelector(".reply-draft-editor details p").textContent,
+      result.replyDraft,
+    );
     navigator.clipboard.writeText = async () => {
       throw new Error("Clipboard unavailable");
     };
     await act(async () => button("Copy reply draft").click());
-    const textarea = document.querySelector("textarea");
     assert.equal(document.activeElement, textarea);
     assert.equal(textarea.selectionStart, 0);
-    assert.equal(textarea.selectionEnd, result.replyDraft.length);
+    assert.equal(textarea.selectionEnd, revised.length);
     assert.match(
       document.querySelector('[role="status"]').textContent,
       /Draft selected/,

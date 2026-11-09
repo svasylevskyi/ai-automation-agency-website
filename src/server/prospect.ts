@@ -5,7 +5,12 @@ import { db, transaction } from "./db";
 import { env } from "./env";
 import { HttpError } from "./http";
 import { recordActivity } from "./activity";
-import { prospectCompletionSchema, type ProspectJob } from "../lib/prospect";
+import {
+  prospectCompletionSchema,
+  replyDraftUpdateSchema,
+  type ProspectJob,
+  type ReplyReview,
+} from "../lib/prospect";
 
 export function prospectEnabled() {
   return env().PROSPECT_AUTOMATION_ENABLED === "true";
@@ -165,5 +170,65 @@ export async function getProspectJob(id: string): Promise<ProspectJob | null> {
     createdAt: row.created_at.toISOString(),
     completedAt: row.completed_at?.toISOString() ?? null,
     result: row.result,
+    review: {
+      text: row.reply_text,
+      ready: row.reply_ready,
+      version: row.reply_version,
+    },
   };
+}
+
+export async function saveReplyDraft(
+  id: string,
+  input: z.infer<typeof replyDraftUpdateSchema>,
+): Promise<ReplyReview> {
+  return transaction(async (client) => {
+    // Match the enquiry-then-job lock order used by preparation and deletion.
+    const parent = await client.query(
+      "SELECT id FROM enquiries WHERE id=$1 FOR UPDATE",
+      [id],
+    );
+    if (!parent.rowCount)
+      throw new HttpError(404, "Enquiry no longer available.");
+    const job = (
+      await client.query(
+        `SELECT result->>'replyDraft' AS original, reply_text, reply_ready, reply_version
+       FROM prospect_jobs WHERE enquiry_id=$1 AND status='completed' FOR UPDATE`,
+        [id],
+      )
+    ).rows[0];
+    if (!job?.original)
+      throw new HttpError(409, "A prepared reply is required before saving.");
+    // A retry after a lost response can acknowledge the already-saved state.
+    if (
+      (job.reply_text ?? job.original) === input.text &&
+      job.reply_ready === input.ready
+    )
+      return {
+        text: job.reply_text,
+        ready: job.reply_ready,
+        version: job.reply_version,
+      };
+    if (job.reply_version !== input.version)
+      throw new HttpError(
+        409,
+        "The saved reply changed. Copy your edits, then reload to review the latest version.",
+      );
+
+    const result = await client.query(
+      `UPDATE prospect_jobs SET reply_text=$2, reply_ready=$3, reply_version=reply_version+1
+       WHERE enquiry_id=$1 RETURNING reply_text AS text, reply_ready AS ready, reply_version AS version`,
+      [id, input.text, input.ready],
+    );
+    // Count edits as owner activity for retention, independently of follow-up edits.
+    await client.query("UPDATE enquiries SET updated_at=now() WHERE id=$1", [
+      id,
+    ]);
+    await recordActivity(
+      client,
+      id,
+      input.ready ? "reply_draft_ready" : "reply_draft_saved",
+    );
+    return result.rows[0];
+  });
 }
