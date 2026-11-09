@@ -195,11 +195,14 @@
 .pagination a {
   padding: 12px;
 }
-.detail-grid {
+.enquiry-sections {
   display: grid;
-  grid-template-columns: 1.1fr 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 24px;
-  align-items: start;
+}
+.prospect-details > summary > h2 {
+  display: inline;
+  margin: 0;
 }
 .enquiry-facts {
   display: grid;
@@ -285,9 +288,6 @@
   }
   .admin-main {
     padding-top: 32px;
-  }
-  .detail-grid {
-    grid-template-columns: 1fr;
   }
   .enquiry-row {
     grid-template-columns: minmax(0, 1fr) 16px;
@@ -392,12 +392,6 @@
 }
 .follow-up-date.overdue {
   color: #963749;
-}
-.activity-card {
-  margin-top: 28px;
-}
-.prospect-card {
-  margin-top: 1.5rem;
 }
 .prospect-card .field {
   margin-bottom: 1rem;

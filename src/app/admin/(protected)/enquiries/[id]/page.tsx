@@ -48,9 +48,11 @@ export default async function Enquiry({
           </p>
         </div>
       </div>
-      <div className="detail-grid">
-        <article className="admin-card">
-          <h2>The conversation starts here.</h2>
+      <div className="enquiry-sections">
+        <details className="admin-card prospect-details" open>
+          <summary>
+            <h2>Prospect details</h2>
+          </summary>
           <dl className="enquiry-facts">
             <dt>Email</dt>
             <dd>
@@ -90,7 +92,14 @@ export default async function Enquiry({
             Visitor acknowledged enquiry data use ({item.privacy_notice_version}
             ).
           </p>
-        </article>
+        </details>
+        <ProspectAssistant
+          id={item.id}
+          version={item.version}
+          closed={item.status === "closed"}
+          enabled={prospectEnabled()}
+          job={await getProspectJob(item.id)}
+        />
         <EnquiryEditor
           key={item.id}
           id={item.id}
@@ -103,18 +112,11 @@ export default async function Enquiry({
           confirmation={item.confirmation_status}
           confirmationAttempts={item.confirmation_attempts}
         />
+        <EnquiryActivity
+          id={item.id}
+          requestedPage={(await searchParams).activityPage}
+        />
       </div>
-      <ProspectAssistant
-        id={item.id}
-        version={item.version}
-        closed={item.status === "closed"}
-        enabled={prospectEnabled()}
-        job={await getProspectJob(item.id)}
-      />
-      <EnquiryActivity
-        id={item.id}
-        requestedPage={(await searchParams).activityPage}
-      />
     </>
   );
 }
