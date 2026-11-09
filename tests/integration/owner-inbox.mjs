@@ -10,6 +10,7 @@ import { recommendAssessment } from "../../src/lib/assessment.ts";
 import { sendNotification } from "../../src/server/mail.ts";
 import { checkFollowUp } from "./follow-up.mjs";
 import { checkRetention } from "./retention.mjs";
+import { checkProspect } from "./prospect.mjs";
 
 if (!new URL(process.env.DATABASE_URL).pathname.endsWith("_test"))
   throw new Error(
@@ -292,6 +293,16 @@ try {
   assert.equal(rows[0].assessment, null);
   checks++;
   const id = rows[0].id;
+  assert.equal(
+    (
+      await db().query(
+        "SELECT count(*)::int AS n FROM prospect_jobs WHERE enquiry_id=$1",
+        [id],
+      )
+    ).rows[0].n,
+    1,
+  );
+  checks++;
   status(
     await call(`/api/admin/enquiries/${id}`, "PATCH", {
       status: "contacted",
@@ -413,6 +424,8 @@ try {
   status(unsafe, 400);
   const followUpChecks = await checkFollowUp({ call, status, enquiry, db });
   checks += followUpChecks;
+  const prospectChecks = await checkProspect({ call, status, db });
+  checks += prospectChecks;
   const retentionChecks = await checkRetention({ call, status, db });
   checks += retentionChecks;
   // A mail outage must not lose the saved enquiry; retry is idempotent once sent.

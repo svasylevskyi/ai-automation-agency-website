@@ -33,6 +33,11 @@ export async function updateEnquiry(
       "UPDATE enquiries SET status=$2,notes=$3,next_action=$4,follow_up_on=$5,version=version+1,updated_at=now() WHERE id=$1 RETURNING version",
       [id, input.status, input.notes, input.nextAction, input.followUpDate],
     );
+    if (input.status === "closed")
+      await client.query(
+        "UPDATE prospect_jobs SET status='cancelled',claim_token=NULL,lease_until=NULL,updated_at=now() WHERE enquiry_id=$1 AND status IN ('pending','running','failed')",
+        [id],
+      );
     if (old.status !== input.status)
       await recordActivity(client, id, "status_changed", {
         from: old.status,
