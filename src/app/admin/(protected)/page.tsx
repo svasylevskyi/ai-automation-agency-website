@@ -44,7 +44,8 @@ export default async function Inbox({
   const pages = Math.max(1, Math.ceil(count / 20));
   const page = Math.min(requested, pages);
   const { rows } = await db().query(
-    `SELECT id,name,company,area,status,created_at,notification_status,confirmation_status,next_action,follow_up_on::text AS due_date
+    `SELECT id,name,company,area,status,created_at,notification_status,confirmation_status,next_action,follow_up_on::text AS due_date,
+       EXISTS (SELECT 1 FROM prospect_jobs WHERE enquiry_id=enquiries.id AND status='completed') AS automation_processed
      FROM enquiries WHERE ($2='' OR status=$2) AND (NOT $3 OR (status<>'closed' AND (status='new' OR follow_up_on <= $1::date)))
      ORDER BY ${attention ? "follow_up_on ASC NULLS LAST,created_at ASC,id ASC" : "created_at DESC,id DESC"} LIMIT 20 OFFSET $4`,
     [today, filter, attention, (page - 1) * 20],
@@ -111,9 +112,18 @@ export default async function Inbox({
                 )}
               </div>
               <div className="row-meta">
-                <span className={`status-badge status-${row.status}`}>
-                  {statuses[row.status as keyof typeof statuses]}
-                </span>
+                <div className="row-badges">
+                  <span className={`status-badge status-${row.status}`}>
+                    {statuses[row.status as keyof typeof statuses]}
+                  </span>
+                  <span
+                    className={`status-badge ${row.automation_processed ? "automation-processed" : "automation-unprocessed"}`}
+                  >
+                    {row.automation_processed
+                      ? "Automation processed"
+                      : "Not processed yet"}
+                  </span>
+                </div>
                 {row.due_date && (
                   <span
                     className={`follow-up-date ${row.due_date < today ? "overdue" : ""}`}

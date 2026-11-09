@@ -168,6 +168,20 @@
   font-weight: 600;
   font-size: 0.75rem;
 }
+.row-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.automation-processed {
+  background: #e1f2ef;
+  color: #245a51;
+}
+.automation-unprocessed {
+  background: #f0eef3;
+  color: #584f63;
+}
 .status-contacted {
   background: #e7effc;
   color: #345a8c;

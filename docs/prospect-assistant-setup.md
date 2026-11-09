@@ -1,6 +1,8 @@
 # Prospect assistant: website → n8n → owner review
 
-This slice prepares an internal brief, discovery questions, a suggested next action and a reply draft. The website remains the record of enquiries. n8n checks for one queued enquiry every minute and returns its result to the existing admin detail page.
+The prospect assistant prepares an internal brief, discovery questions, a suggested next action and a reply draft. The website remains the record of enquiries. The starter workflow checks for one queued enquiry every minute. An existing workflow can use its own schedule and claim loop.
+
+Already running the loop? Follow the [manual AI reply setup](prospect-ai-replies.md) to add targeted first replies to it.
 
 The supplied workflow uses transparent rules, including a generic discovery route for **Other**. It does not use an LLM, research companies, send mail, qualify/reject customers, quote prices, or change enquiry status/notes/follow-up dates. Review and adapt the draft before replying yourself. Existing website receipts and owner notifications continue through Mailpit.
 
@@ -131,7 +133,7 @@ To rotate, pause both sides, generate a fresh token, update the website environm
 
 Move the same workflow to reliable existing n8n hosting, n8n Cloud or an isolated Hetzner instance. A Windows terminal is a pilot. For self-hosting, use a supported pinned release, PostgreSQL, protected HTTPS editor access, restart/resource limits and n8n's production task-runner guidance. Back up the n8n database and encryption key separately and verify an isolated restore; the website's R2 job does not cover them. Recreate credentials instead of exporting plaintext secrets.
 
-Add failure/stale-queue monitoring, check representative examples and finalize privacy/retention arrangements before a monitored real-data pilot. AI drafting, mailbox/calendar integration, approved sending and automated follow-up are later slices. Resend migration is independent of this preparation workflow.
+Add failure/stale-queue monitoring, check representative examples and finalize privacy/retention arrangements before a monitored real-data pilot. Mailbox/calendar integration, approved sending and automated follow-up are later slices. Resend migration is independent of this preparation workflow.
 
 ## Developer verification
 
