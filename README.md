@@ -62,6 +62,8 @@ The optional **[n8n prospect assistant](docs/prospect-assistant-setup.md)** adds
 
 The inbox shows which enquiries have completed automation. For an existing n8n workflow, follow the [manual AI-assisted reply pilot](docs/prospect-ai-replies.md) to draft a first reply and fall back to rules when a model response is unavailable.
 
+To trigger an n8n workflow on submission, set the server-side `N8N_ENQUIRY_WEBHOOK_URL`. See the [enquiry webhook setup and exact JSON payloads](docs/enquiry-webhook.md).
+
 ## Branding and settings
 
 Open **Owner area → Settings** to update the agency name, tagline, search/sharing description, logo, public email, booking URL and optional custom Privacy Policy URL. These changes apply on the next page load without a rebuild. Logos are limited to 2 MB PNG/JPEG/WebP, decoded and re-encoded as PNG, and stored in PostgreSQL; SVG uploads are rejected. Save settings after upload to publish the logo. A checkbox supports logos that already include the agency name.

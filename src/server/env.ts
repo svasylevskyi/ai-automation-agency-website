@@ -18,6 +18,7 @@ const schema = z.object({
   SMTP_FROM: z.email().default("website@example.test"),
   NOTIFICATION_EMAIL: z.email().default("owner@example.test"),
   INDEX_SITE: z.enum(["true", "false"]).default("false"),
+  N8N_ENQUIRY_WEBHOOK_URL: z.string().trim().default(""),
   PROSPECT_AUTOMATION_ENABLED: z.enum(["true", "false"]).default("false"),
   PROSPECT_AUTOMATION_TOKEN: z.string().max(128).default(""),
   TRUSTED_IP_HEADER: z
