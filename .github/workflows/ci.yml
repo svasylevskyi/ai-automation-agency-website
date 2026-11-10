@@ -56,6 +56,8 @@ jobs:
       - run: npm run check
       - name: Test production HTTP and database flows
         shell: bash
+        env:
+          N8N_ENQUIRY_WEBHOOK_URL: http://127.0.0.1:45679/test-enquiry
         run: |
           npm start > /tmp/agency-server.log 2>&1 &
           server_pid=$!

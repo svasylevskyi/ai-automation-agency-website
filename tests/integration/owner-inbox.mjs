@@ -11,6 +11,7 @@ import { sendNotification } from "../../src/server/mail.ts";
 import { checkFollowUp } from "./follow-up.mjs";
 import { checkRetention } from "./retention.mjs";
 import { checkProspect } from "./prospect.mjs";
+import { listenForEnquiryWebhooks } from "./enquiry-webhook.mjs";
 
 if (!new URL(process.env.DATABASE_URL).pathname.endsWith("_test"))
   throw new Error(
@@ -51,6 +52,7 @@ async function signIn(pwd = password) {
   });
   return response;
 }
+const webhookProbe = await listenForEnquiryWebhooks();
 try {
   const health = await call("/api/health");
   status(health, 200);
@@ -702,9 +704,11 @@ try {
   await db().query("UPDATE site_settings SET data=$1,version=version+1", [
     JSON.stringify(saved.data),
   ]);
+  await webhookProbe?.check();
   console.log(
     `Passed ${checks} integration assertions: auth, ownership, editable legal pages, follow-up dates/history/receipts, enquiries, guided assessments, persistence, mail recovery, settings, logos, conflicts, deletion, rate limiting, password changes and session revocation.`,
   );
 } finally {
+  await webhookProbe?.close();
   await db().end();
 }

@@ -10,6 +10,10 @@ import { getSettings } from "@/server/settings";
 import { confirmationMessage } from "@/lib/confirmation";
 import { recordActivity } from "@/server/activity";
 import { enqueueProspect } from "@/server/prospect";
+import {
+  postEnquiryWebhook,
+  type SubmittedEnquiry,
+} from "@/server/enquiry-webhook";
 export async function POST(request: Request) {
   try {
     sameOrigin(request);
@@ -32,9 +36,11 @@ export async function POST(request: Request) {
     const id = randomUUID();
     const { settings } = await getSettings();
     const created = await transaction(async (client) => {
-      const result = await client.query(
+      const result = await client.query<SubmittedEnquiry>(
         `INSERT INTO enquiries (id,submission_id,name,email,company,area,team_size,message,privacy_notice_version,assessment,confirmation_status,confirmation_payload)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'enquiry-v4',$9,'pending',$10) ON CONFLICT (submission_id) DO NOTHING RETURNING id`,
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'enquiry-v4',$9,'pending',$10) ON CONFLICT (submission_id) DO NOTHING
+      RETURNING id,created_at AS "createdAt",name,email,company,area,team_size AS "teamSize",message,
+        assessment,privacy_notice_version AS "privacyNoticeVersion"`,
         [
           id,
           submissionId,
@@ -57,9 +63,12 @@ export async function POST(request: Request) {
         await recordActivity(client, id, "received");
         await enqueueProspect(client, id);
       }
-      return !!result.rowCount;
+      return result.rows[0];
     });
-    if (created) after(() => processEnquiryMail(id));
+    if (created) {
+      after(() => processEnquiryMail(id));
+      after(() => postEnquiryWebhook(created));
+    }
     return accepted();
   } catch (error) {
     return apiError(error);
