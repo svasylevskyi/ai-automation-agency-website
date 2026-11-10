@@ -14,6 +14,23 @@ export const statusSchema = z.enum([
   "in_progress",
   "closed",
 ]);
+export const inboxPageSize = 20;
+export const inboxStatusSchema = z.strictObject({
+  status: statusSchema,
+  enquiries: z
+    .array(
+      z.strictObject({
+        id: z.uuid().toLowerCase(),
+        version: z.number().int().positive(),
+      }),
+    )
+    .min(1)
+    .max(inboxPageSize)
+    .refine(
+      (items) => new Set(items.map(({ id }) => id)).size === items.length,
+      "Select each enquiry once.",
+    ),
+});
 const optionalEmail = z.union([z.literal(""), z.email().max(254)]);
 const optionalHttps = z.union([
   z.literal(""),

@@ -125,19 +125,78 @@
   display: grid;
   gap: 12px;
 }
+.inbox-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 12px 16px;
+  background: #fff;
+  border: 1px solid #e1daed;
+  border-radius: 18px;
+  font-size: 0.9rem;
+}
+.inbox-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  cursor: pointer;
+}
+.inbox-check input {
+  width: 18px;
+  height: 18px;
+  accent-color: #664496;
+}
+.selection-count {
+  margin-right: auto;
+  color: #665c76;
+}
+.inbox-toolbar select {
+  min-height: 44px;
+  padding: 6px 10px;
+  background: #fff;
+  border: 1px solid #bfb3ce;
+  border-radius: 8px;
+}
+.inbox-toolbar .button {
+  min-height: 44px;
+  padding: 8px 18px;
+}
+.inbox-toolbar .button:disabled {
+  cursor: default;
+}
+.inbox-close-note {
+  flex-basis: 100%;
+  margin: 0;
+}
+.inbox-feedback:empty {
+  position: absolute;
+}
+.selectable-enquiry {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  background: #fff;
+  border: 1px solid #e1daed;
+  border-radius: 18px;
+}
+.selectable-enquiry:has(input:checked) {
+  border-color: #7953b7;
+  background: #faf7ff;
+}
+.row-check {
+  justify-content: center;
+}
 .enquiry-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto 20px;
   gap: 24px;
   align-items: center;
-  padding: 24px;
-  background: #fff;
-  border: 1px solid #e1daed;
-  border-radius: 18px;
+  padding: 24px 24px 24px 4px;
+  border-radius: 14px;
   text-decoration: none;
 }
 .enquiry-row:hover {
-  border-color: #a08bbf;
   background: #fcfaff;
 }
 .enquiry-row strong {
@@ -306,7 +365,7 @@
   .enquiry-row {
     grid-template-columns: minmax(0, 1fr) 16px;
     gap: 12px;
-    padding: 20px;
+    padding: 20px 16px 20px 4px;
   }
   .row-meta {
     grid-column: 1;

@@ -60,6 +60,8 @@ See [follow-up behavior, mail recovery and deployment review](docs/enquiry-follo
 
 The optional **[n8n prospect assistant](docs/prospect-assistant-setup.md)** adds a reliable queue, rule-based brief and reply draft to each enquiry's admin page. Replies remain under owner control. The guide includes a Windows pilot without Docker and an importable workflow; the integration is disabled by default.
 
+To change a status from the inbox, tick individual enquiries or **Select all on this page**, choose a status, and click **Apply status**. Closing an enquiry clears its scheduled follow-up and cancels unfinished prospect jobs. Each change appears in the enquiry’s activity history.
+
 The inbox shows which enquiries have completed automation. For an existing n8n workflow, follow the [manual AI-assisted reply pilot](docs/prospect-ai-replies.md) to draft a first reply and fall back to rules when a model response is unavailable.
 
 To trigger an n8n workflow on submission, set the server-side `N8N_ENQUIRY_WEBHOOK_URL`. See the [enquiry webhook setup and exact JSON payloads](docs/enquiry-webhook.md).

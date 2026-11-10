@@ -8,6 +8,7 @@ import { provisionOwner } from "../../src/server/provision.ts";
 import { issueChallenge } from "../../src/server/spam.ts";
 import { recommendAssessment } from "../../src/lib/assessment.ts";
 import { sendNotification } from "../../src/server/mail.ts";
+import { checkInboxStatus } from "./inbox-status.mjs";
 import { checkFollowUp } from "./follow-up.mjs";
 import { checkRetention } from "./retention.mjs";
 import { checkProspect } from "./prospect.mjs";
@@ -424,6 +425,7 @@ try {
     body: '<svg onload="alert(1)"/>',
   });
   status(unsafe, 400);
+  await checkInboxStatus({ call, status, db });
   const followUpChecks = await checkFollowUp({ call, status, enquiry, db });
   checks += followUpChecks;
   const prospectChecks = await checkProspect({ call, status, db });

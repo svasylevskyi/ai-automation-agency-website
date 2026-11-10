@@ -1,8 +1,9 @@
+import { InboxSelection } from "@/components/inbox-selection";
 import { Arrow } from "@/components/arrow";
 import Link from "next/link";
 import { db } from "@/server/db";
 import { requireOwner } from "@/server/owner-page";
-import { statuses, statusSchema } from "@/lib/validation";
+import { inboxPageSize, statuses, statusSchema } from "@/lib/validation";
 import { areas } from "@/lib/planner";
 import {
   warsawToday,
@@ -41,14 +42,14 @@ export default async function Inbox({
     : filter
       ? (counts.rows.find((r) => r.status === filter)?.count ?? 0)
       : total;
-  const pages = Math.max(1, Math.ceil(count / 20));
+  const pages = Math.max(1, Math.ceil(count / inboxPageSize));
   const page = Math.min(requested, pages);
   const { rows } = await db().query(
-    `SELECT id,name,company,area,status,created_at,notification_status,confirmation_status,next_action,follow_up_on::text AS due_date,
+    `SELECT id,version,name,company,area,status,created_at,notification_status,confirmation_status,next_action,follow_up_on::text AS due_date,
        EXISTS (SELECT 1 FROM prospect_jobs WHERE enquiry_id=enquiries.id AND status='completed') AS automation_processed
      FROM enquiries WHERE ($2='' OR status=$2) AND (NOT $3 OR (status<>'closed' AND (status='new' OR follow_up_on <= $1::date)))
-     ORDER BY ${attention ? "follow_up_on ASC NULLS LAST,created_at ASC,id ASC" : "created_at DESC,id DESC"} LIMIT 20 OFFSET $4`,
-    [today, filter, attention, (page - 1) * 20],
+     ORDER BY ${attention ? "follow_up_on ASC NULLS LAST,created_at ASC,id ASC" : "created_at DESC,id DESC"} LIMIT $4 OFFSET $5`,
+    [today, filter, attention, inboxPageSize, (page - 1) * inboxPageSize],
   );
   const pageHref = (number: number) =>
     `/admin?${new URLSearchParams({ view: attention ? "attention" : "all", status: filter, page: String(number) })}`;
@@ -93,14 +94,14 @@ export default async function Inbox({
           </Link>
         ))}
       </nav>
-      <section className="inbox-list" aria-label="Enquiries">
-        {rows.length ? (
-          rows.map((row) => (
-            <Link
-              href={`/admin/enquiries/${row.id}`}
-              className="enquiry-row"
-              key={row.id}
-            >
+      <InboxSelection
+        key={pageHref(requested)}
+        items={rows.map((row) => ({
+          id: row.id,
+          version: row.version,
+          name: row.name,
+          detail: (
+            <Link href={`/admin/enquiries/${row.id}`} className="enquiry-row">
               <div>
                 <strong>{row.name}</strong>
                 <span>
@@ -154,8 +155,10 @@ export default async function Inbox({
                 <Arrow />
               </span>
             </Link>
-          ))
-        ) : (
+          ),
+        }))}
+      >
+        {!rows.length && (
           <div className="admin-card empty-state">
             <h2>
               {attention && total
@@ -183,7 +186,7 @@ export default async function Inbox({
             )}
           </div>
         )}
-      </section>
+      </InboxSelection>
       <nav className="pagination" aria-label="Inbox pages">
         {page > 1 && <Link href={pageHref(page - 1)}>← Previous</Link>}
         <span>
