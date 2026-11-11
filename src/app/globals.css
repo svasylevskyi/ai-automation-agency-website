@@ -225,11 +225,13 @@
     white-space: nowrap;
   }
   .nav a:hover,
-  .nav a[aria-current="location"] {
+  .nav a[aria-current="location"],
+  .nav a[aria-current="page"] {
     color: var(--ink);
   }
   /* Only text links receive the current-section marker. Never target every anchor. */
-  .nav-link[aria-current="location"]::after {
+  .nav-link[aria-current="location"]::after,
+  .nav-link[aria-current="page"]::after {
     content: "";
     position: absolute;
     bottom: 4px;
@@ -294,7 +296,7 @@
   /* Orbit hero and workflow illustration. */
   .hero {
     position: relative;
-    padding: 62px 0 50px;
+    padding: 48px 0;
     isolation: isolate;
     background: radial-gradient(ellipse at 55% 45%, #e2d5fc 0, transparent 65%);
   }
@@ -476,7 +478,7 @@
 
   /* Service offers and illustrative workflows. */
   .section {
-    padding: 98px 0;
+    padding: 48px 0;
     border-top: 1px solid var(--line);
   }
   .section-heading {
@@ -942,9 +944,6 @@
     .wrap {
       max-width: 1320px;
     }
-    .hero {
-      padding-top: 90px;
-    }
   }
   @media (max-width: 1000px) {
     .wrap {
@@ -959,9 +958,6 @@
     }
     .faq-layout {
       gap: 40px;
-    }
-    .section {
-      padding: 78px 0;
     }
     .header-inner {
       gap: 18px;
@@ -1007,9 +1003,6 @@
     }
     .brand {
       max-width: calc(100% - 64px);
-    }
-    .hero {
-      padding-top: 45px;
     }
     .hero-copy > p {
       max-width: 560px;
@@ -1076,9 +1069,6 @@
     .brand {
       font-size: 0.82rem;
     }
-    .hero {
-      padding-bottom: 34px;
-    }
     .hero-copy > p {
       font-size: 0.94rem;
       margin-top: 22px;
@@ -1130,9 +1120,6 @@
     .orbit-core svg {
       width: 35px;
       height: 35px;
-    }
-    .section {
-      padding: 61px 0;
     }
     .section-heading {
       margin-bottom: 30px;

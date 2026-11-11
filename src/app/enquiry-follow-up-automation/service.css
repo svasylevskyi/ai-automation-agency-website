@@ -1,8 +1,31 @@
 .service-page {
   overflow-wrap: break-word;
 }
+.service-navigation {
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+.service-navigation .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 28px;
+  padding-block: 8px;
+}
+.service-navigation a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.service-navigation a:hover {
+  color: var(--accent-text);
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
 .service-hero {
-  padding: 76px 0 80px;
+  padding: 48px 0;
   background: radial-gradient(ellipse at 78% 25%, #e2d5fc 0, transparent 65%);
 }
 .service-hero-grid {
@@ -263,9 +286,6 @@
   }
 }
 @media (max-width: 800px) {
-  .service-hero {
-    padding: 48px 0 56px;
-  }
   .service-hero-grid,
   .service-split,
   .service-contact {
