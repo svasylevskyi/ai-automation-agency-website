@@ -24,7 +24,7 @@ Both seeded pages start marked **Draft for review**. They are public review copi
 
 Full initial texts are in `src/content/privacy-policy.md` and `src/content/website-terms.md`. They are tailored to the current website: browser-local rules-based assessment, protected enquiry inbox, link-only owner notifications captured locally in the test environment, optional external booking and no public checkout/signup or marketing analytics.
 
-The drafts leave placeholders for legal/trading identity, registration details, address, public/privacy/complaints contacts and website URL. The privacy draft also leaves explicit placeholders for actual supplier entities/locations, international-transfer arrangements, and enquiry/log/backup retention. These facts cannot be inferred safely from page content or a hosting brand alone.
+The drafts identify the agency as Get Automated, operated by Stepan Vasylevskyi - InfoTech Consulting, at https://get-automated.ai. Registration details, postal address and public/privacy/complaints contacts still have placeholders. The privacy draft also leaves explicit placeholders for actual supplier entities/locations, international-transfer arrangements, and enquiry/log/backup retention. These facts cannot be inferred safely from page content or a hosting brand alone.
 
 The current build allows manual enquiry deletion, optional closed-enquiry expiry (disabled by default), and separate Restic/R2 backup rotation after server setup and successful recovery checks. See [R2 setup and retention](r2-backup-setup.md). It also cleans expired rate-limit/session rows. Changing the legal text does not change that behavior. Confirm and implement the chosen retention schedule before declaring the policy ready. Do not state that no international transfers occur without checking the actual supplier/access arrangements.
 
@@ -33,6 +33,8 @@ The existing checkbox remains an acknowledgement of the short enquiry data-use e
 ## Storage and deployment
 
 Migration `003-legal-pages.sql` creates `legal_pages`. The migration script seeds the two complete texts only when their rows do not exist. Re-running migrations or deploying future code preserves all owner edits. Migration 004 refreshes only the exact untouched version-1 review drafts to describe receipt emails and activity history; customised pages must be reviewed manually for these additions. Existing enquiries, settings, owner credentials and custom Privacy Policy URLs are preserved.
+
+Migration 008 fills the remaining identity placeholders in stored pages with the supplied legal name, brand and production URL. It also adds the production URL to the standard privacy introduction. The replacements preserve surrounding admin edits and each page's draft setting. A changed page gets a new revision and update date, so an editor opened before deployment must reload before saving. For fully customised wording with no matching placeholders or standard introduction, review the identity in Admin → Settings.
 
 The existing deployment backs up the database and applies the migration automatically. No new environment variables or dependencies are required. Local upgrades need `npm run db:migrate` before starting the app. The release package already includes `src/content/`, so first-run seeding also works from an unpacked release.
 

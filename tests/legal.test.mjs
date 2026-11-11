@@ -58,21 +58,25 @@ test("legal text formatting escapes HTML and does not activate links or embedded
   assert.match(html, /First line.\nSecond line./);
   assert.doesNotMatch(html, /<script|<img|<a /);
 });
-test("bundled drafts include substantive sections and retain explicit business placeholders", async () => {
+test("bundled drafts identify Get Automated and retain outstanding details", async () => {
   for (const slug of legalSlugs) {
     const content = await readFile(
       new URL(`../src/content/${legalPages[slug].file}`, import.meta.url),
       "utf8",
     );
     assert(content.length > 5000);
-    assert.match(content, /\[LEGAL_NAME\]/);
+    assert(content.includes("Stepan Vasylevskyi - InfoTech Consulting"));
+    assert(content.includes("Get Automated"));
+    assert(content.includes("https://get-automated.ai"));
+    assert.match(content, /\[POSTAL_ADDRESS\]/);
+    assert.doesNotMatch(content, /\[(LEGAL_NAME|TRADING_NAME|WEBSITE_URL)\]/);
     assert(legalUpdateSchema.safeParse({ ...valid, content }).success);
     assert.equal(
       legalUpdateSchema.safeParse({ ...valid, content, isDraft: false })
         .success,
       false,
     );
-    assert.doesNotMatch(content, /Stepan|stephen|2\.31\.126\.173/);
+    assert.doesNotMatch(content, /2\.31\.126\.173|duckdns\.org/);
   }
   assert.equal(privacyHref(""), "/privacy");
   assert.equal(

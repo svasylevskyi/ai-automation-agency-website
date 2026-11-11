@@ -8,6 +8,7 @@ import { provisionOwner } from "../../src/server/provision.ts";
 import { issueChallenge } from "../../src/server/spam.ts";
 import { recommendAssessment } from "../../src/lib/assessment.ts";
 import { sendNotification } from "../../src/server/mail.ts";
+import { checkLegalIdentity } from "./legal-identity.mjs";
 import { checkInboxStatus } from "./inbox-status.mjs";
 import { checkFollowUp } from "./follow-up.mjs";
 import { checkRetention } from "./retention.mjs";
@@ -106,6 +107,7 @@ try {
   cookie = cookies.map((c) => c.split(";")[0]).join("; ");
   status(await call("/admin", "GET", undefined, true), 200);
   // Public legal pages, owner-only editing, safe rendering and migration preservation.
+  await checkLegalIdentity(db);
   const legalOriginals = (
     await db().query("SELECT * FROM legal_pages ORDER BY slug")
   ).rows;
@@ -116,10 +118,13 @@ try {
     status(page, 200);
     const html = await page.text();
     assert.match(html, /Draft for review/);
-    assert.match(html, /LEGAL_NAME/);
+    assert.match(html, /Stepan Vasylevskyi - InfoTech Consulting/);
+    assert.match(html, /Get Automated/);
+    assert.match(html, /https:\/\/get-automated\.ai/);
+    assert.doesNotMatch(html, /\[(LEGAL_NAME|TRADING_NAME|WEBSITE_URL)\]/);
     assert.match(html, /name="robots" content="noindex/);
     assert.match(html, new RegExp(`rel="canonical" href="${base}/${slug}"`));
-    checks += 4;
+    checks += 7;
   }
   const settingsPage = await call("/admin/settings", "GET", undefined, true);
   status(settingsPage, 200);

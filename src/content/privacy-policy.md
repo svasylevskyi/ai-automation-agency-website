@@ -1,8 +1,8 @@
-This Privacy Policy explains how personal data is handled when you visit this website, use the optional workflow assessment, send an enquiry or access the private owner area. It covers the website and the initial enquiry process. Any later client engagement may need a separate privacy notice and data-processing agreement.
+This Privacy Policy explains how personal data is handled when you visit https://get-automated.ai, use the optional workflow assessment, send an enquiry or access the private owner area. It covers the website and the initial enquiry process. Any later client engagement may need a separate privacy notice and data-processing agreement.
 
 ## 1. Who is responsible for your data
 
-The controller is [LEGAL_NAME], operating as [TRADING_NAME], with a postal address at [POSTAL_ADDRESS], Poland. Registration details, where applicable: [REGISTRATION_DETAILS].
+The controller is Stepan Vasylevskyi - InfoTech Consulting, operating as Get Automated, with a postal address at [POSTAL_ADDRESS], Poland. Registration details, where applicable: [REGISTRATION_DETAILS].
 
 For privacy questions or requests, contact [PRIVACY_CONTACT_EMAIL] or write to the postal address above. These placeholders must be completed before this draft is used as the final notice.
 
