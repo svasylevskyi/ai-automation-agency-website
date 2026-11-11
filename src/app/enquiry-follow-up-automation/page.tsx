@@ -113,7 +113,17 @@ export default async function EnquiryFollowUpService() {
       <a className="skip" href="#main">
         Skip to content
       </a>
-      <SiteHeader brand={brand} service />
+      <SiteHeader brand={brand} />
+      <nav className="service-navigation" aria-label="Service navigation">
+        <div className="wrap">
+          <a href="/">Home</a>
+          <a href="#service">The service</a>
+          <a href="#approach">How it works</a>
+          <a href="#investment">Investment</a>
+          <a href="#questions">Service FAQ</a>
+          <a href="#contact">Let’s talk</a>
+        </div>
+      </nav>
       <main id="main" className="service-page" tabIndex={-1}>
         <section className="service-hero" aria-labelledby="service-title">
           <div className="wrap service-hero-grid">

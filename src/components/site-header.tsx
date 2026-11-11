@@ -1,34 +1,23 @@
 "use client";
 
 import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { usePathname } from "next/navigation";
 import type { PublicBrand } from "@/server/settings";
 import { Brand } from "./brand";
 import { Arrow } from "./arrow";
 
 const links = [
   ["/enquiry-follow-up-automation", "Services"],
-  ["#solutions", "Solutions"],
-  ["#in-practice", "In practice"],
-  ["#approach", "Approach"],
-  ["#questions", "Questions"],
-  ["#contact", "Let’s talk"],
-] as const;
-const serviceLinks = [
-  ["/", "Home"],
-  ["#service", "The service"],
-  ["#approach", "How it works"],
-  ["#investment", "Investment"],
-  ["#questions", "Questions"],
-  ["#contact", "Let’s talk"],
+  ["/#solutions", "Solutions"],
+  ["/#in-practice", "In practice"],
+  ["/#approach", "Approach"],
+  ["/#questions", "Questions"],
+  ["/#contact", "Let’s talk"],
 ] as const;
 
-export function SiteHeader({
-  brand,
-  service = false,
-}: {
-  brand: PublicBrand;
-  service?: boolean;
-}) {
+export function SiteHeader({ brand }: { brand: PublicBrand }) {
+  const pathname = usePathname();
+  const home = pathname === "/";
   const [current, setCurrent] = useState("");
   const disclosure = useRef<HTMLDetailsElement>(null);
   const header = useRef<HTMLElement>(null);
@@ -37,6 +26,12 @@ export function SiteHeader({
     let frame = 0;
     const update = () => {
       frame = 0;
+      // Global section links always belong to the homepage, even when a
+      // service page has sections with the same IDs.
+      if (!home) {
+        setCurrent("");
+        return;
+      }
       let active = "";
       const offset = (header.current?.offsetHeight ?? 72) + 36;
       const sections = Array.from(
@@ -101,27 +96,33 @@ export function SiteHeader({
       document.removeEventListener("pointerdown", onOutside);
       breakpoint.removeEventListener("change", close);
     };
-  }, []);
+  }, [home]);
 
   const navigate = (event: MouseEvent<HTMLAnchorElement>, id: string) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
       return;
     if (disclosure.current) disclosure.current.open = false;
-    document.getElementById(id)?.focus({ preventScroll: true });
+    if (home) document.getElementById(id)?.focus({ preventScroll: true });
   };
 
-  const navigation = (service ? serviceLinks : links).map(([href, label]) => (
+  const navigation = links.map(([href, label]) => (
     <a
       key={href}
-      className={href === "#contact" ? "nav-cta" : "nav-link"}
+      className={href === "/#contact" ? "nav-cta" : "nav-link"}
       href={href}
-      aria-current={href === `#${current}` ? "location" : undefined}
+      aria-current={
+        href === pathname
+          ? "page"
+          : home && href === `/#${current}`
+            ? "location"
+            : undefined
+      }
       onClick={(event) =>
-        navigate(event, href.startsWith("#") ? href.slice(1) : "")
+        navigate(event, href.startsWith("/#") ? href.slice(2) : "")
       }
     >
       {label}
-      {href === "#contact" && <Arrow />}
+      {href === "/#contact" && <Arrow />}
     </a>
   ));
 
