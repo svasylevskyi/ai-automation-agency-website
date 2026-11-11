@@ -35,6 +35,9 @@ export async function listenForEnquiryWebhooks() {
         name: row.name,
         email: row.email,
         company: row.company,
+        enquiryRoute: row.enquiry_route,
+        businessWebsite: row.business_website,
+        currentTools: row.current_tools,
         area: row.area,
         teamSize: row.team_size,
         message: row.message,
@@ -63,6 +66,8 @@ export async function listenForEnquiryWebhooks() {
         "visitor@example.test",
         "followup@example.test",
         "assessed@example.test",
+        "process-review@example.test",
+        "custom-automation@example.test",
         ...Array.from({ length: 5 }, (_, i) => `limit${i}@example.test`),
       ].sort();
       for (

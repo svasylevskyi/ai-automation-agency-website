@@ -8,6 +8,7 @@ import { verifyChallenge, rateLimit, clientKey } from "@/server/spam";
 import { processEnquiryMail } from "@/server/mail";
 import { getSettings } from "@/server/settings";
 import { confirmationMessage } from "@/lib/confirmation";
+import { serviceEnquirySuccess } from "@/lib/enquiry-routes";
 import { recordActivity } from "@/server/activity";
 import { enqueueProspect } from "@/server/prospect";
 import {
@@ -19,7 +20,14 @@ export async function POST(request: Request) {
     sameOrigin(request);
     const input = enquirySchema.parse(await readJson(request, 32000));
     const accepted = () =>
-      json({ message: "Thank you. Your enquiry has been received." }, 201);
+      json(
+        {
+          message: input.enquiryRoute
+            ? serviceEnquirySuccess
+            : "Thank you. Your enquiry has been received.",
+        },
+        201,
+      );
     // Honeypot submissions receive the same response without creating records or mail.
     if (input.website) return accepted();
     const submissionId = verifyChallenge(input.token);
@@ -37,10 +45,11 @@ export async function POST(request: Request) {
     const { settings } = await getSettings();
     const created = await transaction(async (client) => {
       const result = await client.query<SubmittedEnquiry>(
-        `INSERT INTO enquiries (id,submission_id,name,email,company,area,team_size,message,privacy_notice_version,assessment,confirmation_status,confirmation_payload)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'enquiry-v4',$9,'pending',$10) ON CONFLICT (submission_id) DO NOTHING
+        `INSERT INTO enquiries (id,submission_id,name,email,company,area,team_size,message,privacy_notice_version,assessment,confirmation_status,confirmation_payload,enquiry_route,business_website,current_tools)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'enquiry-v4',$9,'pending',$10,$11,$12,$13) ON CONFLICT (submission_id) DO NOTHING
       RETURNING id,created_at AS "createdAt",name,email,company,area,team_size AS "teamSize",message,
-        assessment,privacy_notice_version AS "privacyNoticeVersion"`,
+        assessment,privacy_notice_version AS "privacyNoticeVersion",
+        enquiry_route AS "enquiryRoute",business_website AS "businessWebsite",current_tools AS "currentTools"`,
         [
           id,
           submissionId,
@@ -57,6 +66,9 @@ export async function POST(request: Request) {
               })
             : null,
           JSON.stringify(confirmationMessage(settings)),
+          input.enquiryRoute ?? null,
+          input.businessWebsite,
+          input.currentTools,
         ],
       );
       if (result.rowCount) {

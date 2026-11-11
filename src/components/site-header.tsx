@@ -6,14 +6,29 @@ import { Brand } from "./brand";
 import { Arrow } from "./arrow";
 
 const links = [
-  ["solutions", "Solutions"],
-  ["in-practice", "In practice"],
-  ["approach", "Approach"],
-  ["questions", "Questions"],
-  ["contact", "Let’s talk"],
+  ["/enquiry-follow-up-automation", "Services"],
+  ["#solutions", "Solutions"],
+  ["#in-practice", "In practice"],
+  ["#approach", "Approach"],
+  ["#questions", "Questions"],
+  ["#contact", "Let’s talk"],
+] as const;
+const serviceLinks = [
+  ["/", "Home"],
+  ["#service", "The service"],
+  ["#approach", "How it works"],
+  ["#investment", "Investment"],
+  ["#questions", "Questions"],
+  ["#contact", "Let’s talk"],
 ] as const;
 
-export function SiteHeader({ brand }: { brand: PublicBrand }) {
+export function SiteHeader({
+  brand,
+  service = false,
+}: {
+  brand: PublicBrand;
+  service?: boolean;
+}) {
   const [current, setCurrent] = useState("");
   const disclosure = useRef<HTMLDetailsElement>(null);
   const header = useRef<HTMLElement>(null);
@@ -95,16 +110,18 @@ export function SiteHeader({ brand }: { brand: PublicBrand }) {
     document.getElementById(id)?.focus({ preventScroll: true });
   };
 
-  const navigation = links.map(([id, label]) => (
+  const navigation = (service ? serviceLinks : links).map(([href, label]) => (
     <a
-      key={id}
-      className={id === "contact" ? "nav-cta" : "nav-link"}
-      href={`#${id}`}
-      aria-current={current === id ? "location" : undefined}
-      onClick={(event) => navigate(event, id)}
+      key={href}
+      className={href === "#contact" ? "nav-cta" : "nav-link"}
+      href={href}
+      aria-current={href === `#${current}` ? "location" : undefined}
+      onClick={(event) =>
+        navigate(event, href.startsWith("#") ? href.slice(1) : "")
+      }
     >
       {label}
-      {id === "contact" && <Arrow />}
+      {href === "#contact" && <Arrow />}
     </a>
   ));
 

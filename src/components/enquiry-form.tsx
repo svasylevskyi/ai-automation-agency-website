@@ -12,6 +12,11 @@ import { recommendAssessment, type AssessmentAnswers } from "@/lib/assessment";
 import { AssessmentSummary, Recommendation } from "./assessment-summary";
 import { privacyHref } from "@/lib/legal";
 import { Arrow } from "./arrow";
+import {
+  enquiryRouteLabels,
+  enquiryRoutes,
+  type EnquiryRoute,
+} from "@/lib/enquiry-routes";
 
 export function EnquiryForm({
   brand,
@@ -20,6 +25,8 @@ export function EnquiryForm({
   onEditAssessment,
   onRemoveAssessment,
   onSent,
+  enquiryRoute,
+  onRouteChange,
 }: {
   brand: PublicBrand;
   assessment: AssessmentAnswers | null;
@@ -27,7 +34,11 @@ export function EnquiryForm({
   onEditAssessment: () => void;
   onRemoveAssessment: () => void;
   onSent: () => void;
+  enquiryRoute?: EnquiryRoute;
+  onRouteChange?: (route: EnquiryRoute) => void;
 }) {
+  const service = !!enquiryRoute;
+  const processReview = enquiryRoute === "enquiry-process review";
   const [token, setToken] = useState("");
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState("");
@@ -63,10 +74,21 @@ export function EnquiryForm({
           name: form.get("name"),
           email: form.get("email"),
           company: form.get("company"),
-          area: assessment?.area ?? form.get("area"),
+          area: service
+            ? processReview
+              ? "sales"
+              : "other"
+            : (assessment?.area ?? form.get("area")),
           teamSize: assessment?.teamSize ?? form.get("teamSize"),
           assessment: assessment ?? undefined,
           message: form.get("message"),
+          ...(service
+            ? {
+                enquiryRoute,
+                businessWebsite: form.get("businessWebsite"),
+                currentTools: form.get("currentTools"),
+              }
+            : {}),
           privacyAcknowledged: form.get("privacyAcknowledged") === "on",
           website: form.get("website"),
           token,
@@ -100,11 +122,16 @@ export function EnquiryForm({
   return (
     <div className="enquiry-card">
       <h3 ref={headingRef} tabIndex={-1}>
-        Let’s start with your workflow.
+        {service
+          ? processReview
+            ? "Tell us about your enquiry process"
+            : "Tell us about your automation challenge"
+          : "Let’s start with your workflow."}
       </h3>
       <p>
-        Tell us what takes too much time. We’ll use your details to reply about
-        your enquiry.
+        {service
+          ? "Please describe the process without including customer records, passwords, or confidential information."
+          : "Tell us what takes too much time. We’ll use your details to reply about your enquiry."}
       </p>
       {sent ? (
         <div
@@ -123,6 +150,26 @@ export function EnquiryForm({
         </div>
       ) : (
         <form onSubmit={submit}>
+          {service && (
+            <label className="field">
+              <span>I’d like to discuss</span>
+              <select
+                name="enquiryRoute"
+                value={enquiryRoute}
+                disabled={pending}
+                onChange={(event) =>
+                  onRouteChange?.(event.target.value as EnquiryRoute)
+                }
+              >
+                {enquiryRoutes.map((route) => (
+                  <option key={route} value={route}>
+                    {enquiryRouteLabels[route]}
+                  </option>
+                ))}
+              </select>
+              {errorFor("enquiryRoute")}
+            </label>
+          )}
           {assessment && (
             <section
               className="attached-assessment"
@@ -173,7 +220,7 @@ export function EnquiryForm({
               {errorFor("name")}
             </label>
             <label className="field">
-              <span>Email</span>
+              <span>{service ? "Work email" : "Email"}</span>
               <input
                 name="email"
                 type="email"
@@ -188,22 +235,43 @@ export function EnquiryForm({
           </div>
           <label className="field">
             <span>
-              Company <small>(optional)</small>
+              {service ? "Business name" : "Company"} <small>(optional)</small>
             </span>
             <input name="company" autoComplete="organization" maxLength={120} />
           </label>
+          {service && (
+            <label className="field">
+              <span>
+                Business website <small>(optional)</small>
+              </span>
+              <input
+                name="businessWebsite"
+                type="url"
+                autoComplete="url"
+                placeholder="https://example.com"
+                maxLength={500}
+                aria-invalid={!!fields.businessWebsite}
+                aria-describedby={
+                  fields.businessWebsite ? "businessWebsite-error" : undefined
+                }
+              />
+              {errorFor("businessWebsite")}
+            </label>
+          )}
           {!assessment && (
             <>
-              <label className="field">
-                <span>Where does work get stuck?</span>
-                <select name="area">
-                  {Object.entries(areas).map(([key, value]) => (
-                    <option value={key} key={key}>
-                      {value}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              {!service && (
+                <label className="field">
+                  <span>Where does work get stuck?</span>
+                  <select name="area">
+                    {Object.entries(areas).map(([key, value]) => (
+                      <option value={key} key={key}>
+                        {value}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
               <label className="field">
                 <span>Your team</span>
                 <select name="teamSize">
@@ -218,9 +286,13 @@ export function EnquiryForm({
           )}
           <label className="field">
             <span>
-              {assessment
-                ? "Anything else you’d like us to know? (optional)"
-                : "What would you like to make easier?"}
+              {service
+                ? processReview
+                  ? "How do enquiries reach you, and what would you like to improve?"
+                  : "What process would you like to improve?"
+                : assessment
+                  ? "Anything else you’d like us to know? (optional)"
+                  : "What would you like to make easier?"}
             </span>
             <textarea
               name="message"
@@ -229,15 +301,39 @@ export function EnquiryForm({
               minLength={assessment ? undefined : 20}
               maxLength={5000}
               placeholder={
-                assessment
-                  ? "Add any extra context…"
-                  : "The process, tools you use, and where the manual work happens…"
+                service
+                  ? processReview
+                    ? "For example: enquiries arrive through our website and email. We record them manually, and follow-up depends on whoever picks up the message."
+                    : "Describe one process, where the work gets stuck, and the outcome you are looking for."
+                  : assessment
+                    ? "Add any extra context…"
+                    : "The process, tools you use, and where the manual work happens…"
               }
               aria-invalid={!!fields.message}
               aria-describedby={fields.message ? "message-error" : undefined}
             />
             {errorFor("message")}
           </label>
+          {service && (
+            <label className="field">
+              <span>
+                {processReview
+                  ? "Which tools do you use to manage enquiries and follow-up?"
+                  : "Which tools do you use for this process?"}{" "}
+                <small>(optional)</small>
+              </span>
+              <textarea
+                name="currentTools"
+                rows={2}
+                maxLength={1000}
+                aria-invalid={!!fields.currentTools}
+                aria-describedby={
+                  fields.currentTools ? "currentTools-error" : undefined
+                }
+              />
+              {errorFor("currentTools")}
+            </label>
+          )}
           <p className="privacy-note" id="enquiry-privacy">
             Please leave out passwords and sensitive client information. Your
             contact details, message and any attached assessment are stored for
@@ -288,7 +384,14 @@ export function EnquiryForm({
             </label>
           </div>
           <button className="button" type="submit" disabled={pending || !token}>
-            {pending ? "Sending…" : "Send enquiry"} <Arrow />
+            {pending
+              ? "Sending…"
+              : service
+                ? processReview
+                  ? "Request an enquiry-process review"
+                  : "Discuss another automation challenge"
+                : "Send enquiry"}{" "}
+            <Arrow />
           </button>
           <div ref={feedback} tabIndex={-1} role="status" aria-live="polite">
             {message && <p className="notice error">{message}</p>}

@@ -170,8 +170,8 @@ export default async function Home() {
                   <li>CRM updates & context</li>
                   <li>Follow-up preparation</li>
                 </ul>
-                <a className="text-link" href="#contact">
-                  Explore the fit{" "}
+                <a className="text-link" href="/enquiry-follow-up-automation">
+                  Explore the service{" "}
                   <span aria-hidden="true">
                     <svg
                       className="corner-arrow"

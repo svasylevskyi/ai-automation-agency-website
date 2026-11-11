@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { assessmentSchema } from "./assessment";
 import { followUpDate } from "./follow-up";
+import { enquiryRoutes } from "./enquiry-routes";
 
 export const statuses = {
   new: "New",
@@ -65,6 +66,24 @@ export const enquirySchema = z
       .max(254)
       .transform((v) => v.toLowerCase()),
     company: z.string().trim().max(120).default(""),
+    enquiryRoute: z.enum(enquiryRoutes).optional(),
+    businessWebsite: z
+      .union([
+        z.literal(""),
+        z
+          .url()
+          .max(500)
+          .refine((value) => {
+            const url = new URL(value);
+            return (
+              ["https:", "http:"].includes(url.protocol) &&
+              !url.username &&
+              !url.password
+            );
+          }, "Use an HTTP or HTTPS website address without credentials."),
+      ])
+      .default(""),
+    currentTools: z.string().trim().max(1000).default(""),
     area: z.enum(["sales", "operations", "support", "other"]),
     teamSize: z.enum(["small", "mid", "large"]),
     message: z.string().trim().max(5000),

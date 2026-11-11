@@ -22,6 +22,9 @@ export function SiteFooter({
             Illustrative workflows. Every engagement starts with an assessment.
           </p>
           <nav className="legal-links" aria-label="Legal information">
+            <a href="/enquiry-follow-up-automation">
+              Enquiry &amp; follow-up service
+            </a>
             <a href={privacyHref(brand.privacyUrl)}>Privacy Policy</a>
             <a href="/terms">Website Terms</a>
           </nav>

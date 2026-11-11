@@ -1,5 +1,6 @@
 import type { SavedAssessment } from "../lib/assessment";
 import type { Area, TeamSize } from "../lib/planner";
+import type { EnquiryRoute } from "../lib/enquiry-routes";
 import { env } from "./env";
 
 // Only the submission fields returned by the insert belong in this event.
@@ -9,6 +10,9 @@ export type SubmittedEnquiry = {
   name: string;
   email: string;
   company: string;
+  enquiryRoute: EnquiryRoute | null;
+  businessWebsite: string;
+  currentTools: string;
   area: Area;
   teamSize: TeamSize;
   message: string;
