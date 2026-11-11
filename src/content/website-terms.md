@@ -2,9 +2,9 @@ These Website Terms describe the use of this website, its free workflow assessme
 
 ## 1. Website operator and contact
 
-The service provider is [LEGAL_NAME], operating as [TRADING_NAME], with a postal address at [POSTAL_ADDRESS], Poland. Registration and tax details, where applicable: [REGISTRATION_DETAILS].
+The service provider is Stepan Vasylevskyi - InfoTech Consulting, operating as Get Automated, with a postal address at [POSTAL_ADDRESS], Poland. Registration and tax details, where applicable: [REGISTRATION_DETAILS].
 
-For enquiries, complaints or questions about these terms, contact [CONTACT_EMAIL] or use the postal address above. The website address is [WEBSITE_URL]. These placeholders must be completed before this draft is used as final terms.
+For enquiries, complaints or questions about these terms, contact [CONTACT_EMAIL] or use the postal address above. The website address is https://get-automated.ai. These placeholders must be completed before this draft is used as final terms.
 
 ## 2. What the website provides
 
