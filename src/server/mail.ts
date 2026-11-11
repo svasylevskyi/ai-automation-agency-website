@@ -1,9 +1,13 @@
 import { randomUUID } from "node:crypto";
-import nodemailer from "nodemailer";
 import { transaction } from "./db";
 import { env } from "./env";
 import { recordActivity } from "./activity";
 import { confirmationPayloadSchema } from "../lib/confirmation";
+import {
+  deliverMail,
+  MailDeliveryError,
+  type MailAcceptance,
+} from "./mail-delivery";
 
 type Channel = "notification" | "confirmation";
 // These identifiers come only from this internal union, never from request input.
@@ -29,23 +33,8 @@ async function sendEnquiryMail(id: string, channel: Channel, manual = false) {
   });
   if (!claim) return;
   const config = env();
-  const transport = nodemailer.createTransport({
-    host: config.SMTP_HOST,
-    port: config.SMTP_PORT,
-    secure: config.SMTP_SECURE === "true",
-    auth: config.SMTP_USER
-      ? { user: config.SMTP_USER, pass: config.SMTP_PASSWORD ?? "" }
-      : undefined,
-    requireTLS:
-      !["127.0.0.1", "localhost", "::1"].includes(config.SMTP_HOST) &&
-      config.SMTP_SECURE !== "true",
-    connectionTimeout: 5000,
-    greetingTimeout: 5000,
-    socketTimeout: 10000,
-    disableFileAccess: true,
-    disableUrlAccess: true,
-  });
-  let sent = false;
+  let acceptance: MailAcceptance | undefined;
+  let failureCode: string | undefined;
   try {
     const message =
       channel === "confirmation"
@@ -58,9 +47,9 @@ async function sendEnquiryMail(id: string, channel: Channel, manual = false) {
             subject: "New website enquiry",
             text: `A new enquiry is saved in your owner inbox.\n\nOpen it securely: ${config.APP_URL}/admin/enquiries/${id}\n\nThis notification does not include the visitor's message or contact details.`,
           };
-    const result = await transport.sendMail({
+    acceptance = await deliverMail(config, {
       ...message,
-      from: config.SMTP_FROM,
+      from: config.MAIL_FROM,
       messageId: `<enquiry-${channel}-${id}@${new URL(config.APP_URL).hostname}>`,
       ...(channel === "confirmation"
         ? {
@@ -71,18 +60,19 @@ async function sendEnquiryMail(id: string, channel: Channel, manual = false) {
           }
         : {}),
     });
-    sent = !!result.accepted?.length;
-  } catch {
-    // Never log the recipient, private enquiry or raw SMTP error.
-  } finally {
-    transport.close();
+  } catch (error) {
+    failureCode =
+      error instanceof MailDeliveryError
+        ? error.code
+        : "mail_preparation_failed";
   }
+  const sent = !!acceptance;
   if (!sent)
     console.error(
-      "Enquiry email attempt failed; the saved enquiry remains available.",
+      `Enquiry email attempt failed (${failureCode}); the saved enquiry remains available.`,
     );
-  // A lost database update after SMTP acceptance leaves a stale claim for recovery.
-  // The stable Message-ID helps identification but cannot guarantee exactly-once email.
+  // A lost database update after acceptance leaves a stale claim for recovery.
+  // Resend deduplicates identical requests for 24h; SMTP has no such guarantee.
   await transaction(async (client) => {
     const completed = await client.query(
       `UPDATE enquiries SET ${channel}_status=$3, ${channel}_claim=NULL,
@@ -94,6 +84,11 @@ async function sendEnquiryMail(id: string, channel: Channel, manual = false) {
       await recordActivity(client, id, sent ? "mail_sent" : "mail_failed", {
         channel,
         attempt: claim.attempts,
+        provider: config.MAIL_PROVIDER,
+        ...(acceptance?.providerMessageId
+          ? { providerMessageId: acceptance.providerMessageId }
+          : {}),
+        ...(failureCode ? { failureCode } : {}),
       });
   });
 }

@@ -40,9 +40,10 @@ Mailpit captures outgoing emails locally; nothing is sent to a real email addres
 | `npm run db:migrate`                       | Apply auth schema and checked, versioned application migrations; preserve existing data       |
 | `npm run owner:create`                     | Create the single owner interactively                                                         |
 | `npm run owner:create -- --reset-password` | Reset the existing owner's password using the same email; invalidate all sessions             |
+| `npm run mail:check`                     | Read-only mail configuration, Reply-To and pending-message preflight (no email sent)            |
 | `npm run maintenance`                      | Recover mail for up to 100 enquiries and remove expired request limits/sessions |
 
-Use **Owner area → Account** to change your password with the current password. Other sessions are revoked; the current session is rotated. The admin area has no public registration, invitation or email password-reset endpoint. Forgotten-password recovery requires local/server terminal access. Owner notifications and visitor confirmations are attempted after saving each new enquiry. The inbox shows their separate delivery states and retry actions. The Hetzner maintenance timer recovers eligible attempts every five minutes, up to five automatic attempts per channel. An interrupted SMTP send can result in a duplicate on recovery; the saved enquiry remains available even when delivery fails.
+Use **Owner area → Account** to change your password with the current password. Other sessions are revoked; the current session is rotated. The admin area has no public registration, invitation or email password-reset endpoint. Forgotten-password recovery requires local/server terminal access. Owner notifications and visitor confirmations are attempted after saving each new enquiry. The inbox shows their separate delivery states and retry actions. The Hetzner maintenance timer recovers eligible attempts every five minutes, up to five automatic attempts per channel. Resend protects identical retries for 24 hours; SMTP or a retry outside that window can result in a duplicate on recovery; the saved enquiry remains available even when delivery fails.
 
 ## Guided workflow assessment
 
@@ -55,6 +56,8 @@ See [guided assessment behavior, validation and review steps](docs/guided-assess
 Admin opens on **Needs attention**, showing new enquiries and actions due today or overdue in Warsaw time. Add a next action and date, complete it, and review the private activity history on each enquiry. New submissions receive a generic confirmation email with an optional booking link; existing enquiries do not receive retrospective receipts. The public email is used as Reply-To. Mailpit captures both kinds of email in the test environment.
 
 See [follow-up behavior, mail recovery and deployment review](docs/enquiry-follow-up.md).
+
+For production, follow [Google Workspace + Resend setup](docs/email-setup.md). Set `MAIL_PROVIDER=resend`, `RESEND_API_KEY`, `MAIL_FROM` and `NOTIFICATION_EMAIL` on the server, and the working business reply address in Owner area → Settings. Resend sends notifications/receipts; Gmail handles incoming replies and personal correspondence. Without `MAIL_PROVIDER`, the existing SMTP configuration remains in use. The website does not need Gmail credentials.
 
 ## Prospect assistant
 

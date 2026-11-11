@@ -15,6 +15,7 @@ import { checkRetention } from "./retention.mjs";
 import { checkProspect } from "./prospect.mjs";
 import { listenForEnquiryWebhooks } from "./enquiry-webhook.mjs";
 import { checkServiceEnquiry } from "./service-enquiry.mjs";
+import { checkResendMail } from "./resend-mail.mjs";
 
 if (!new URL(process.env.DATABASE_URL).pathname.endsWith("_test"))
   throw new Error(
@@ -714,6 +715,7 @@ try {
     JSON.stringify(saved.data),
   ]);
   await webhookProbe?.check();
+  checks += await checkResendMail({ db });
   console.log(
     `Passed ${checks} integration assertions: auth, ownership, editable legal pages, follow-up dates/history/receipts, enquiries, guided assessments, persistence, mail recovery, settings, logos, conflicts, deletion, rate limiting, password changes and session revocation.`,
   );

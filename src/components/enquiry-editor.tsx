@@ -108,8 +108,8 @@ export function EnquiryEditor(props: Props) {
       }
       setMessage(
         result.status === "sent"
-          ? "Accepted by the mail server. Inbox delivery is not confirmed."
-          : "Not accepted by the mail server yet. Check the delivery state and mail settings.",
+          ? "Accepted by the email provider. Inbox delivery is not confirmed."
+          : "Not accepted by the email provider yet. Check the delivery state and mail settings.",
       );
     });
   }
@@ -271,8 +271,8 @@ export function EnquiryEditor(props: Props) {
       )}
       <p className="privacy-note">
         Automatic retries stop after five attempts. An email accepted by the
-        server may still bounce or go to spam. In the test environment, messages
-        are captured in Mailpit. Reload to see background delivery updates.
+        provider may still bounce or go to spam. Check your provider's dashboard
+        for delivery details. Reload to see background delivery updates.
       </p>
       <details className="danger-zone">
         <summary>Delete enquiry</summary>

@@ -129,10 +129,10 @@ Set every placeholder in `site.env`:
 | `DATABASE_URL`               | `postgresql://agency:YOUR_DB_PASSWORD@127.0.0.1:5432/agency`                  |
 | `APP_URL`                    | Exact HTTPS origin, e.g. `https://agency.example.com`; no trailing slash/path |
 | `BETTER_AUTH_SECRET`         | Unique random secret; generate on the server using `openssl rand -hex 48`     |
-| `SMTP_HOST`, `SMTP_PORT`     | Your SMTP provider's submission host/port, typically 587                      |
-| `SMTP_SECURE`                | `false` for STARTTLS on 587; `true` for implicit TLS on 465                   |
-| `SMTP_USER`, `SMTP_PASSWORD` | SMTP provider credentials                                                     |
-| `SMTP_FROM`                  | Sender address verified with that provider                                    |
+| `MAIL_PROVIDER`              | `resend` for live HTTPS delivery; `smtp` (default) retains existing SMTP/Mailpit |
+| `RESEND_API_KEY`             | Resend Sending-access key restricted to the verified domain; server only       |
+| `MAIL_FROM`                  | Verified plain sender address, e.g. `website@mail.get-automated.ai`            |
+| `SMTP_*`                     | Only for `MAIL_PROVIDER=smtp`; legacy `SMTP_FROM` is used when `MAIL_FROM` is blank |
 | `NOTIFICATION_EMAIL`         | Inbox where you want enquiry notifications                                    |
 | `INDEX_SITE`                 | Keep `false` during testing; change to `true` when ready for indexing         |
 | `TRUSTED_IP_HEADER`          | `x-agency-client-ip` with the included Caddy configuration                    |
@@ -147,7 +147,7 @@ Check the local database connection without printing credentials:
 ss -lnt | grep ':5432'
 ```
 
-PostgreSQL should listen only on loopback (`127.0.0.1`/`::1`). The first deployment verifies the real connection and runs migrations. For email, use authenticated SMTP on the provider's supported submission port; do not rely on port 25 or a local development Mailpit server.
+PostgreSQL should listen only on loopback (`127.0.0.1`/`::1`). The first deployment verifies the real connection and runs migrations. For live email, complete [Google Workspace + Resend setup](email-setup.md). Resend uses outbound HTTPS to `api.resend.com:443`. SMTP remains supported as an alternative (587 with STARTTLS or 465 with implicit TLS); Mailpit is for test mail only.
 
 ## 5. Enable HTTPS
 

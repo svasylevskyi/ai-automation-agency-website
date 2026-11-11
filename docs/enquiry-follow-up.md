@@ -1,12 +1,12 @@
 # Enquiry acknowledgement and follow-up
 
-This increment adds a visitor receipt, a next action/date, a Needs attention view and private activity history. The public form has no additional fields or steps. All emails still use the configured SMTP server; on the current Hetzner test environment they are captured by Mailpit.
+This increment adds a visitor receipt, a next action/date, a Needs attention view and private activity history. The public form has no additional fields or steps. Emails use the configured provider: SMTP/Mailpit for local testing or Resend for production. See [live email setup](email-setup.md).
 
 ## Visitor experience
 
 A successful submission shows that the enquiry was saved and explains that a confirmation email should follow. Its absence does not mean the enquiry was lost. The receipt contains fixed next-step wording, the agency name and an optional booking link. It does not include the visitor's name, message, company, assessment, private notes or an admin link. It is not a booking, paid order or marketing subscription.
 
-Public email is also the Reply-To address for new receipts. When it is blank, the receipt explains that replies to the sender are not monitored and directs corrections to the website. The SMTP sender and owner notification recipient remain separate server settings. Booking URL is included only when configured. These public settings are captured at submission time: retries use the same receipt wording, booking link and Reply-To address.
+Public email is also the Reply-To address for new receipts. When it is blank, the receipt explains that replies to the sender are not monitored and directs corrections to the website. The server sender (`MAIL_FROM`, falling back to legacy `SMTP_FROM`) and owner notification recipient remain separate server settings. Booking URL is included only when configured. These public settings are captured at submission time: retries use the same receipt wording, booking link and Reply-To address.
 
 Replies go to that mailbox; this increment does not import email replies, provide a reply composer, or automatically email visitors on follow-up dates. The form acknowledgement now records `enquiry-v4`; earlier records keep their original notice version.
 
@@ -22,11 +22,11 @@ Save changes before completing the saved action. A stale save, completion or del
 
 The owner-only activity history records receipt, status changes, note-update times, follow-up scheduling/changes/clearing/completion, and mail attempts/outcomes. It shows newest first, in Warsaw time, with 50 events per page. Previous note text is not retained in the history. Action text and dates are retained to explain completed or changed work. Ordinary calls and email replies are not tracked automatically; record relevant context in private notes.
 
-Mail-server acceptance is labelled accurately: it does not confirm inbox delivery, reading or a later bounce. No tracking pixels or external email analytics are added.
+Email-provider acceptance is labelled accurately: it does not confirm inbox delivery, reading or a later bounce. No tracking pixels or external email analytics are added.
 
 Both mail channels use database claims. Concurrent workers cannot claim the same current attempt; an outdated worker cannot overwrite a newer claim. Maintenance retries failed or interrupted attempts after five minutes. Automatic recovery stops after five attempts per channel. The owner can manually retry owner notifications beyond that cap; visitor receipts have a hard five-attempt cap. Retry endpoints also have per-enquiry rate limits. Successfully accepted emails are not resent by a normal retry. On an interrupted fifth attempt, maintenance marks the outcome unknown/failed for review instead of leaving Sending forever.
 
-Saving an enquiry and its initial history event is transactional. So are owner edits/history and mail-state/history updates. SMTP delivery is separate: a crash after acceptance but before the database update can cause a duplicate on recovery, despite a stable Message-ID. A receipt's address comes from the submitted email; it is not independently verified. Existing origin, honeypot, challenge and submission/email rate limits remain in force, and the body never reflects untrusted enquiry text.
+Saving an enquiry and its initial history event is transactional. So are owner edits/history and mail-state/history updates. Delivery is separate: Resend deduplicates identical requests for 24 hours; SMTP has no equivalent guarantee. A crash after acceptance but before the database update can still cause a duplicate outside that window or after changing provider/message configuration. Resend message IDs and safe failure codes are recorded in the activity history; delivery/bounce events are checked in the provider dashboard. A receipt's address comes from the submitted email; it is not independently verified. Existing origin, honeypot, challenge and submission/email rate limits remain in force, and the body never reflects untrusted enquiry text.
 
 Deleting an enquiry removes its action, receipt snapshot and activity rows from the active database. It does not recall email already in flight/accepted, remove Mailpit messages or erase backups. Apply the agreed retention process to those stores separately. [Retention and R2 recovery](r2-backup-setup.md) now provide optional closed-enquiry expiry and minimal deletion checkpoints for recovery.
 

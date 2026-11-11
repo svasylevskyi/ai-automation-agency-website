@@ -15,7 +15,8 @@
     "setup:local": "node scripts/setup-local.mjs",
     "db:migrate": "node --env-file-if-exists=.env.local --import tsx scripts/migrate.ts",
     "owner:create": "node --env-file-if-exists=.env.local --import tsx scripts/owner.ts",
-    "maintenance": "node --env-file-if-exists=.env.local --import tsx scripts/maintenance.ts"
+    "maintenance": "node --env-file-if-exists=.env.local --import tsx scripts/maintenance.ts",
+    "mail:check": "node --env-file-if-exists=.env.local --import tsx scripts/check-mail.ts"
   },
   "dependencies": {
     "better-auth": "1.7.17",
