@@ -13,6 +13,7 @@ import {
 } from "@/components/assessment-summary";
 import type { SavedAssessment } from "@/lib/assessment";
 import { areas } from "@/lib/planner";
+import { enquiryRouteLabels, type EnquiryRoute } from "@/lib/enquiry-routes";
 export default async function Enquiry({
   params,
   searchParams,
@@ -60,6 +61,26 @@ export default async function Enquiry({
             </dd>
             <dt>Company</dt>
             <dd>{item.company || "Not supplied"}</dd>
+            {item.enquiry_route && (
+              <>
+                <dt>Enquiry route</dt>
+                <dd>
+                  {enquiryRouteLabels[item.enquiry_route as EnquiryRoute]}
+                </dd>
+              </>
+            )}
+            {item.business_website && (
+              <>
+                <dt>Business website</dt>
+                <dd>{item.business_website}</dd>
+              </>
+            )}
+            {item.current_tools && (
+              <>
+                <dt>Current tools</dt>
+                <dd className="enquiry-message">{item.current_tools}</dd>
+              </>
+            )}
             <dt>Workflow</dt>
             <dd>{areas[item.area as keyof typeof areas]}</dd>
             <dt>Team</dt>

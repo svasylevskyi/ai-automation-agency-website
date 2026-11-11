@@ -84,7 +84,8 @@ export async function claimProspect() {
     // All operations lock the parent enquiry first, then its job. Concurrent
     // workers skip locked parents; deletion/closure cannot race acceptance.
     const row = (
-      await client.query(`SELECT e.id,e.company,e.area,e.team_size,e.message,e.assessment,j.id AS job_id
+      await client.query(`SELECT e.id,e.company,e.area,e.team_size,e.message,e.assessment,
+      e.enquiry_route,e.business_website,e.current_tools,j.id AS job_id
       FROM enquiries e JOIN prospect_jobs j ON j.enquiry_id=e.id
       WHERE e.status <> 'closed' AND j.attempts < 5
         AND (j.status='pending' OR (j.status='running' AND j.lease_until < now()))
@@ -109,6 +110,9 @@ export async function claimProspect() {
       claimToken: token,
       enquiry: {
         company: row.company,
+        enquiryRoute: row.enquiry_route,
+        businessWebsite: row.business_website,
+        currentTools: row.current_tools,
         area: row.area,
         teamSize: row.team_size,
         message: row.message,

@@ -19,6 +19,9 @@ The following examples show the JSON body sent over HTTP. In n8n's Webhook trigg
   "name": "Alex Morgan",
   "email": "alex@example.test",
   "company": "Example Studio",
+  "enquiryRoute": null,
+  "businessWebsite": "",
+  "currentTools": "",
   "area": "operations",
   "teamSize": "small",
   "message": "We copy orders into a spreadsheet every Friday.",
@@ -37,6 +40,9 @@ The following examples show the JSON body sent over HTTP. In n8n's Webhook trigg
   "name": "Alex Morgan",
   "email": "alex@example.test",
   "company": "Example Studio",
+  "enquiryRoute": null,
+  "businessWebsite": "",
+  "currentTools": "",
   "area": "operations",
   "teamSize": "small",
   "message": "",
@@ -64,6 +70,30 @@ The following examples show the JSON body sent over HTTP. In n8n's Webhook trigg
 ```
 
 Both examples have the same top-level keys. The website trims the enquiry text and lowercases the email. An omitted company is an empty string. A direct enquiry has `assessment: null`; a submitted assessment can accompany an empty message. The nested `recommendation` is computed by the website from the answers.
+
+## Service-page enquiries
+
+The service page uses the same form endpoint, storage and delivery behavior. Its additional fields are included in every webhook:
+
+| Field | Value |
+| --- | --- |
+| `enquiryRoute` | `"enquiry-process review"` or `"custom automation"`; `null` for the existing homepage form and earlier records. |
+| `businessWebsite` | Optional HTTP(S) address, up to 500 characters; `""` when absent. The website does not fetch this URL. |
+| `currentTools` | Optional free text, up to 1,000 characters; `""` when absent. |
+
+For example, a service-page submission adds this context to the direct-enquiry body above:
+
+```json
+{
+  "enquiryRoute": "enquiry-process review",
+  "businessWebsite": "https://example.test",
+  "currentTools": "HubSpot and Google Sheets"
+}
+```
+
+In your n8n webhook workflow, read these as `$json.body.enquiryRoute`, `$json.body.businessWebsite` and `$json.body.currentTools`. For the polling workflow, they are also available on `job.enquiry` in the claim response. Include the route and current tools in your model's user message if you want it to use that context. Treat these fields as visitor-supplied data, not instructions. No workflow import is needed.
+
+The existing `website` field in the POST to `/api/enquiries` remains the hidden spam honeypot; it is unrelated to `businessWebsite` and is never forwarded to n8n. The service form keeps the existing team-size question, so existing workers continue to receive `small`, `mid` or `large`.
 
 ## Delivery behavior
 

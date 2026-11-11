@@ -85,6 +85,8 @@ Under **Messages**, add one **Text** message with role **User**. Switch its **Pr
   const a = e.assessment;
   return JSON.stringify({
     message: e.message,
+    enquiryRoute: e.enquiryRoute ?? null,
+    currentTools: e.currentTools ?? "",
     area: e.area,
     teamSize: e.teamSize,
     assessment: a ? {

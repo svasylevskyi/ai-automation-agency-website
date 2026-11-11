@@ -1,0 +1,312 @@
+.service-page {
+  overflow-wrap: break-word;
+}
+.service-hero {
+  padding: 76px 0 80px;
+  background: radial-gradient(ellipse at 78% 25%, #e2d5fc 0, transparent 65%);
+}
+.service-hero-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: clamp(32px, 5vw, 72px);
+  align-items: center;
+}
+.service-hero-copy h1 {
+  font-size: clamp(3rem, 4.7vw, 4.8rem);
+  max-width: 740px;
+}
+.service-hero-copy h1 span {
+  display: block;
+}
+.service-hero-copy > p:not(.eyebrow) {
+  margin-top: 22px;
+  max-width: 610px;
+}
+.service-hero-copy .service-lead {
+  font-size: 1.1rem;
+}
+.service-page .service-emphasis,
+.service-page strong {
+  color: var(--ink);
+}
+.service-emphasis {
+  font-weight: 600;
+}
+.service-actions {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 28px;
+}
+.service-actions .text-link {
+  font-size: 0.85rem;
+  display: inline-flex;
+  gap: 12px;
+  align-items: center;
+  min-height: 44px;
+}
+.service-small {
+  font-size: 0.8rem;
+  line-height: 1.65;
+}
+.service-demo {
+  background: #ffffffb8;
+  padding: clamp(24px, 3vw, 36px);
+  border: 1px solid white;
+  border-radius: 28px;
+  box-shadow: 0 24px 80px #4f338014;
+}
+.service-demo-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  color: var(--accent-text);
+}
+.service-demo-dot {
+  flex: 0 0 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.service-demo h2 {
+  font-size: clamp(1.9rem, 2.8vw, 2.7rem);
+  margin-bottom: 16px;
+}
+.service-demo-stages {
+  list-style: none;
+  padding: 0;
+  margin: 26px 0 0;
+}
+.service-demo-stages li {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 12px;
+  padding: 20px 0;
+  border-top: 1px solid var(--line);
+}
+.service-demo-stages li:last-child {
+  padding-bottom: 0;
+}
+.service-demo-number {
+  color: var(--accent-text);
+  font-family: monospace;
+  font-size: 0.8rem;
+  padding-top: 2px;
+}
+.service-demo h3 {
+  font-size: 1rem;
+  letter-spacing: -0.02em;
+  margin-bottom: 9px;
+}
+.service-demo-stages p {
+  font-size: 0.88rem;
+}
+.service-demo-tag {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 0.67rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: #eee7f8;
+  color: #55426f;
+}
+.service-demo-tag.review {
+  background: #ede7cf;
+  color: #625321;
+}
+.service-split {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: clamp(40px, 7vw, 100px);
+}
+.service-split h2 {
+  font-size: clamp(2rem, 3.5vw, 3.3rem);
+}
+.service-prose > * + * {
+  margin-top: 20px;
+}
+.service-prose .eyebrow {
+  margin-bottom: 0;
+}
+.service-tint {
+  background: #ebe5f7;
+}
+.service-section-heading {
+  max-width: 770px;
+  margin-bottom: 42px;
+}
+.service-section-heading > p:not(.eyebrow) {
+  margin-top: 22px;
+  max-width: 650px;
+}
+.service-outcomes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px 56px;
+}
+.service-outcomes article {
+  border-top: 1px solid var(--line-strong);
+  padding: 26px 0;
+}
+.service-outcomes .micro {
+  color: var(--accent-text);
+}
+.service-outcomes h3 {
+  margin: 16px 0;
+  max-width: 410px;
+}
+.service-closing {
+  max-width: 760px;
+  margin-top: 24px;
+  font-size: 1.1rem;
+}
+.service-flow {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  list-style: none;
+  margin: 0 0 40px;
+  padding: 0;
+  border-block: 1px solid var(--line-strong);
+}
+.service-flow li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px 20px 24px 0;
+}
+.service-flow .micro,
+.service-flow-arrow {
+  color: var(--accent-text);
+}
+.service-flow strong {
+  font-size: 1.05rem;
+}
+.service-flow-arrow {
+  position: absolute;
+  right: 16px;
+  top: 48px;
+}
+.service-readable {
+  max-width: 800px;
+}
+.service-control {
+  background: #e1d6f3;
+}
+.service-callout {
+  border-left: 3px solid var(--accent);
+  padding: 4px 0 4px 20px;
+}
+.service-steps {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px 60px;
+  padding: 0;
+  margin: 0;
+}
+.service-steps li {
+  display: grid;
+  grid-template-columns: 38px 1fr;
+  gap: 18px;
+  border-top: 1px solid var(--line-strong);
+  padding-top: 28px;
+}
+.service-step-number {
+  font-size: 1.4rem;
+  font-family: monospace;
+  line-height: 1;
+  color: var(--accent-text);
+}
+.service-steps h3 {
+  font-size: 1.5rem;
+}
+.service-page .faq-list details p + p {
+  padding-top: 0;
+}
+.service-contact {
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: clamp(32px, 5vw, 72px);
+  align-items: start;
+}
+.service-contact > .service-prose {
+  position: sticky;
+  top: calc(var(--header-height, 72px) + 32px);
+}
+.service-contact h2 {
+  font-size: clamp(2.2rem, 3.8vw, 3.6rem);
+}
+.service-page .enquiry-card {
+  background: #ffffffd4;
+}
+.service-page .button,
+.service-page .text-link {
+  max-width: 100%;
+}
+@media (max-width: 1000px) {
+  .service-hero-grid {
+    grid-template-columns: 1.1fr 1fr;
+    gap: 28px;
+  }
+  .service-hero-copy h1 {
+    font-size: clamp(3rem, 5.5vw, 4.5rem);
+  }
+  .service-flow {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .service-flow li:nth-child(3) .service-flow-arrow {
+    display: none;
+  }
+}
+@media (max-width: 800px) {
+  .service-hero {
+    padding: 48px 0 56px;
+  }
+  .service-hero-grid,
+  .service-split,
+  .service-contact {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+  .service-hero-copy {
+    max-width: 650px;
+  }
+  .service-demo {
+    max-width: 600px;
+  }
+  .service-contact > .service-prose {
+    position: static;
+  }
+  .service-steps {
+    gap: 32px;
+  }
+}
+@media (max-width: 520px) {
+  .service-hero-copy h1 {
+    font-size: clamp(2.6rem, 10vw, 3.4rem);
+  }
+  .service-outcomes,
+  .service-steps {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .service-steps li {
+    padding-block: 24px;
+  }
+  .service-section-heading {
+    margin-bottom: 30px;
+  }
+  .service-flow strong {
+    font-size: 0.9rem;
+  }
+  .service-flow-arrow {
+    right: 6px;
+  }
+  .service-page .service-actions .button {
+    width: 100%;
+  }
+}

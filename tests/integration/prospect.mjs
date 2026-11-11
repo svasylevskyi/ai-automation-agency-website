@@ -101,7 +101,10 @@ export async function checkProspect({ call, status, db }) {
     equal(Object.keys(job.enquiry).sort(), [
       "area",
       "assessment",
+      "businessWebsite",
       "company",
+      "currentTools",
+      "enquiryRoute",
       "message",
       "teamSize",
     ]);

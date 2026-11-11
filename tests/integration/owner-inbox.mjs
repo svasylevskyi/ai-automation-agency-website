@@ -14,6 +14,7 @@ import { checkFollowUp } from "./follow-up.mjs";
 import { checkRetention } from "./retention.mjs";
 import { checkProspect } from "./prospect.mjs";
 import { listenForEnquiryWebhooks } from "./enquiry-webhook.mjs";
+import { checkServiceEnquiry } from "./service-enquiry.mjs";
 
 if (!new URL(process.env.DATABASE_URL).pathname.endsWith("_test"))
   throw new Error(
@@ -614,6 +615,7 @@ try {
     .getSetCookie()
     .map((c) => c.split(";")[0])
     .join("; ");
+  await checkServiceEnquiry({ call, status, db });
   const nextPassword = randomBytes(30).toString("base64url");
   const passwordInput = {
     currentPassword: password,
