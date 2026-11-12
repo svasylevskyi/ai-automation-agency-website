@@ -55,15 +55,18 @@ test("Warsaw calendar dates are correct around midnight and daylight saving chan
   assert.equal(formatFollowUpDate("2026-11-06"), "6 Nov 2026");
 });
 test("confirmation text contains only public settings, with optional booking and reply-to", () => {
-  const message = confirmationMessage({
-    name: "My agency",
-    contactEmail: "public@example.test",
-    bookingUrl: "https://example.test/book",
-    nameFromForm: "PRIVATE NAME",
-    email: "visitor@example.test",
-    message: "PRIVATE MESSAGE",
-    assessment: "PRIVATE ASSESSMENT",
-  });
+  const message = confirmationMessage(
+    {
+      name: "My agency",
+      contactEmail: "public@example.test",
+      bookingUrl: "https://example.test/book",
+      nameFromForm: "PRIVATE NAME",
+      email: "visitor@example.test",
+      message: "PRIVATE MESSAGE",
+      assessment: "PRIVATE ASSESSMENT",
+    },
+    "https://get-automated.ai",
+  );
   assert(confirmationPayloadSchema.safeParse(message).success);
   assert.equal(message.replyTo, "public@example.test");
   assert.match(message.text, /https:\/\/example.test\/book/);
@@ -73,11 +76,14 @@ test("confirmation text contains only public settings, with optional booking and
     JSON.stringify(message),
     /PRIVATE|visitor@example.test|\/admin/,
   );
-  const minimal = confirmationMessage({
-    name: "Agency",
-    contactEmail: "",
-    bookingUrl: "",
-  });
+  const minimal = confirmationMessage(
+    {
+      name: "Agency",
+      contactEmail: "",
+      bookingUrl: "",
+    },
+    "https://get-automated.ai",
+  );
   assert.equal(minimal.replyTo, undefined);
   assert.doesNotMatch(minimal.text, /choose a time|reply to this email/);
   assert.match(minimal.text, /not monitored/);

@@ -124,11 +124,15 @@ export async function checkFollowUp({ call, status, enquiry, db }) {
   );
   assert.equal(item.confirmation_payload.replyTo, "public@example.test");
   assert.match(item.confirmation_payload.text, /https:\/\/example.test\/book/);
+  assert.doesNotMatch(item.confirmation_payload.text, /copy each enquiry/);
+  assert.match(item.confirmation_payload.text, /^Hello Follow-up Visitor,/);
+  assert.match(item.confirmation_payload.html, /Hello Follow-up Visitor,/);
+  assert.match(item.notification_payload.html, /Review the enquiry/);
   assert.doesNotMatch(
-    item.confirmation_payload.text,
+    item.notification_payload.html,
     /Follow-up Visitor|copy each enquiry/,
   );
-  checks += 7;
+  checks += 11;
   await Promise.all([
     sendConfirmation(id),
     sendConfirmation(id),

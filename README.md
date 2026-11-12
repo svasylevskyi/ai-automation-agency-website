@@ -53,9 +53,9 @@ See [guided assessment behavior, validation and review steps](docs/guided-assess
 
 ## Enquiry follow-up
 
-Admin opens on **Needs attention**, showing new enquiries and actions due today or overdue in Warsaw time. Add a next action and date, complete it, and review the private activity history on each enquiry. New submissions receive a generic confirmation email with an optional booking link; existing enquiries do not receive retrospective receipts. The public email is used as Reply-To. Mailpit captures both kinds of email in the test environment.
+Admin opens on **Needs attention**, showing new enquiries and actions due today or overdue in Warsaw time. Add a next action and date, complete it, and review the private activity history on each enquiry. New submissions receive a branded acknowledgement with a polite name greeting and an optional booking link; existing enquiries do not receive retrospective receipts. The public email is used as Reply-To. Mailpit captures both kinds of email in the test environment.
 
-See [follow-up behavior, mail recovery and deployment review](docs/enquiry-follow-up.md).
+See [follow-up behavior, mail recovery and deployment review](docs/enquiry-follow-up.md) and [branded email templates](docs/email-templates.md).
 
 For production, follow [Google Workspace + Resend setup](docs/email-setup.md). Set `MAIL_PROVIDER=resend`, `RESEND_API_KEY`, `MAIL_FROM` and `NOTIFICATION_EMAIL` on the server, and the working business reply address in Owner area → Settings. Resend sends notifications/receipts; Gmail handles incoming replies and personal correspondence. Without `MAIL_PROVIDER`, the existing SMTP configuration remains in use. The website does not need Gmail credentials.
 

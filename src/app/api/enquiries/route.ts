@@ -6,8 +6,10 @@ import { db, transaction } from "@/server/db";
 import { apiError, json, readJson, sameOrigin } from "@/server/http";
 import { verifyChallenge, rateLimit, clientKey } from "@/server/spam";
 import { processEnquiryMail } from "@/server/mail";
-import { getSettings } from "@/server/settings";
+import { getBrand } from "@/server/settings";
+import { env } from "@/server/env";
 import { confirmationMessage } from "@/lib/confirmation";
+import { notificationMessage } from "@/lib/notification";
 import { serviceEnquirySuccess } from "@/lib/enquiry-routes";
 import { recordActivity } from "@/server/activity";
 import { enqueueProspect } from "@/server/prospect";
@@ -42,11 +44,12 @@ export async function POST(request: Request) {
     await rateLimit(`enquiry:${clientKey(request.headers)}`, 5, 900);
     await rateLimit(`email:${input.email}`, 3, 3600);
     const id = randomUUID();
-    const { settings } = await getSettings();
+    const brand = await getBrand();
+    const appUrl = env().APP_URL;
     const created = await transaction(async (client) => {
       const result = await client.query<SubmittedEnquiry>(
-        `INSERT INTO enquiries (id,submission_id,name,email,company,area,team_size,message,privacy_notice_version,assessment,confirmation_status,confirmation_payload,enquiry_route,business_website,current_tools)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'enquiry-v4',$9,'pending',$10,$11,$12,$13) ON CONFLICT (submission_id) DO NOTHING
+        `INSERT INTO enquiries (id,submission_id,name,email,company,area,team_size,message,privacy_notice_version,assessment,confirmation_status,confirmation_payload,enquiry_route,business_website,current_tools,notification_payload)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'enquiry-v4',$9,'pending',$10,$11,$12,$13,$14) ON CONFLICT (submission_id) DO NOTHING
       RETURNING id,created_at AS "createdAt",name,email,company,area,team_size AS "teamSize",message,
         assessment,privacy_notice_version AS "privacyNoticeVersion",
         enquiry_route AS "enquiryRoute",business_website AS "businessWebsite",current_tools AS "currentTools"`,
@@ -65,10 +68,11 @@ export async function POST(request: Request) {
                 recommendation: recommendAssessment(input.assessment),
               })
             : null,
-          JSON.stringify(confirmationMessage(settings)),
+          JSON.stringify(confirmationMessage(brand, appUrl, input.name)),
           input.enquiryRoute ?? null,
           input.businessWebsite,
           input.currentTools,
+          JSON.stringify(notificationMessage(brand, appUrl, id)),
         ],
       );
       if (result.rowCount) {

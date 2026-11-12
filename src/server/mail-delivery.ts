@@ -9,6 +9,7 @@ export type OutgoingMail = {
   to: string;
   subject: string;
   text: string;
+  html?: string;
   replyTo?: string;
   messageId: string;
   headers?: Record<string, string>;
@@ -36,6 +37,7 @@ export async function deliverMail(
       to: [message.to],
       subject: message.subject,
       text: message.text,
+      ...(message.html ? { html: message.html } : {}),
       ...(message.replyTo ? { reply_to: message.replyTo } : {}),
       headers: { ...message.headers, "Message-ID": message.messageId },
     });
