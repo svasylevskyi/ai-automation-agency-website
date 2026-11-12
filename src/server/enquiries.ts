@@ -31,7 +31,7 @@ async function lockEnquiries(client: PoolClient, ids: string[]) {
   return rows;
 }
 
-async function saveLockedEnquiry(
+export async function saveLockedEnquiry(
   client: PoolClient,
   old: LockedEnquiry,
   input: Omit<EnquiryUpdate, "version">,

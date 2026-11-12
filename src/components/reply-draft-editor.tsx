@@ -1,6 +1,8 @@
 "use client";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ReplySender } from "./reply-sender";
+import type { ReplyDelivery } from "@/lib/reply-delivery";
 import {
   replyDraftLimit,
   type ProspectResult,
@@ -18,11 +20,17 @@ export function ReplyDraftEditor({
   original,
   source = "rules",
   review,
+  enquiryVersion,
+  closed,
+  delivery,
 }: {
   id: string;
   original: string;
   source?: ProspectResult["replySource"];
   review: ReplyReview;
+  enquiryVersion: number;
+  closed: boolean;
+  delivery: ReplyDelivery | null;
 }) {
   const router = useRouter();
   const textarea = useRef<HTMLTextAreaElement>(null);
@@ -32,19 +40,23 @@ export function ReplyDraftEditor({
   );
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState("");
+  const [sendLocked, setSendLocked] = useState(false);
+  const locked = sendLocked || !!(delivery && delivery.status !== "preview");
   // A router refresh can supply another tab's save. Keep the version on which
   // local edits were based so a subsequent submit cannot overwrite it silently.
   const saved = review.version > confirmed.version ? review : confirmed;
   const savedText = saved.text ?? original;
   const text = edit?.text ?? savedText;
   const valid = text.trim().length > 0;
-  const status = edit
-    ? "Unsaved changes"
-    : saved.ready
-      ? "Ready to send"
-      : saved.version
-        ? "Draft saved"
-        : "Draft ready for review";
+  const status = locked
+    ? "Reply approved — see delivery status below"
+    : edit
+      ? "Unsaved changes"
+      : saved.ready
+        ? "Ready to send"
+        : saved.version
+          ? "Draft saved"
+          : "Draft ready for review";
 
   async function save(ready: boolean) {
     setSaving(true);
@@ -117,7 +129,7 @@ export function ReplyDraftEditor({
           rows={12}
           maxLength={replyDraftLimit}
           value={text}
-          readOnly={saving}
+          readOnly={saving || locked}
           onChange={(event) => {
             const value = event.target.value;
             setEdit(
@@ -136,7 +148,7 @@ export function ReplyDraftEditor({
         <button
           type="button"
           className="button secondary"
-          disabled={saving || !valid || (!edit && !saved.ready)}
+          disabled={locked || saving || !valid || (!edit && !saved.ready)}
           onClick={() => save(false)}
         >
           {saved.ready && !edit ? "Return to draft" : "Save draft"}
@@ -144,7 +156,7 @@ export function ReplyDraftEditor({
         <button
           type="button"
           className="button"
-          disabled={saving || !valid || (!edit && saved.ready)}
+          disabled={locked || saving || !valid || (!edit && saved.ready)}
           onClick={() => save(true)}
         >
           Mark ready to send
@@ -159,6 +171,15 @@ export function ReplyDraftEditor({
         </button>
       </div>
       <p role="status">{feedback}</p>
+      <ReplySender
+        id={id}
+        reviewVersion={saved.version}
+        enquiryVersion={enquiryVersion}
+        ready={saved.ready && !edit && !saving}
+        closed={closed}
+        delivery={delivery}
+        onLock={setSendLocked}
+      />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { EnquiryEditor } from "@/components/enquiry-editor";
 import { EnquiryActivity } from "@/components/enquiry-activity";
 import { ProspectAssistant } from "@/components/prospect-assistant";
 import { getProspectJob, prospectEnabled } from "@/server/prospect";
+import { getReplyDelivery } from "@/server/reply-delivery";
 import {
   AssessmentSummary,
   Recommendation,
@@ -120,6 +121,7 @@ export default async function Enquiry({
           closed={item.status === "closed"}
           enabled={prospectEnabled()}
           job={await getProspectJob(item.id)}
+          delivery={await getReplyDelivery(item.id)}
         />
         <EnquiryEditor
           key={item.id}

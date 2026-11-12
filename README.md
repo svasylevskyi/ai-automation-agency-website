@@ -63,6 +63,8 @@ For production, follow [Google Workspace + Resend setup](docs/email-setup.md). S
 
 The optional **[n8n prospect assistant](docs/prospect-assistant-setup.md)** adds a reliable queue, rule-based brief and reply draft to each enquiry's admin page. Replies remain under owner control. The guide includes a Windows pilot without Docker and an importable workflow; the integration is disabled by default.
 
+**[Reviewed first replies](docs/approved-replies.md)** can be previewed and explicitly sent from the owner inbox, with a frozen delivery record and an optional follow-up reminder. n8n never sends them. For launch on the existing server, follow the **[production cutover and test-data cleanup guide](docs/production-cutover.md)**.
+
 To change a status from the inbox, tick individual enquiries or **Select all on this page**, choose a status, and click **Apply status**. Closing an enquiry clears its scheduled follow-up and cancels unfinished prospect jobs. Each change appears in the enquiry’s activity history.
 
 The inbox shows which enquiries have completed automation. For an existing n8n workflow, follow the [manual AI-assisted reply pilot](docs/prospect-ai-replies.md) to draft a first reply and fall back to rules when a model response is unavailable.

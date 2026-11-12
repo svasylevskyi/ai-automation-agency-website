@@ -20,9 +20,11 @@ const actionText = (value?: { action: string; date: string }) =>
     : "None";
 export function describeActivity(kind: string, details: Details) {
   const channel =
-    details.channel === "confirmation"
-      ? "Visitor confirmation"
-      : "Owner notification";
+    details.channel === "reply"
+      ? "Reviewed reply"
+      : details.channel === "confirmation"
+        ? "Visitor confirmation"
+        : "Owner notification";
   switch (kind) {
     case "history_started":
       return "History tracking started. Earlier changes are not available.";
@@ -36,6 +38,12 @@ export function describeActivity(kind: string, details: Details) {
       return "Reply saved as a draft.";
     case "reply_draft_ready":
       return "Reply marked ready to send.";
+    case "reply_send_approved":
+      return "Owner approved the previewed first reply for sending.";
+    case "reply_unconfirmed":
+      return `Reply attempt ${details.attempt}: acceptance was not confirmed. Check the delivery record before retrying or replying manually.`;
+    case "reply_follow_up_skipped":
+      return "Reply accepted, but the chosen follow-up was not applied because the enquiry changed or the date passed. Review the current next action.";
     case "status_changed":
       return `Status: ${statuses[details.from!] ?? details.from} → ${statuses[details.to!] ?? details.to}.`;
     case "notes_updated":

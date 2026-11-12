@@ -78,7 +78,7 @@ export function emailTemplate(input: {
     ? Math.max(1, Math.round(brand.logo!.height * scale))
     : 40;
   const paragraph = (text: string) =>
-    `<p style="margin:0 0 18px;color:#685d7b;font-size:16px;line-height:1.65;overflow-wrap:anywhere;">${escapeEmailHtml(text)}</p>`;
+    `<p style="margin:0 0 18px;color:#685d7b;font-size:16px;line-height:1.65;overflow-wrap:anywhere;">${escapeEmailHtml(text).replace(/\r?\n/g, "<br>")}</p>`;
   // Tables, inline styles, system fonts and a fluid width keep the core layout
   // usable without external CSS, downloaded fonts, or images being enabled.
   return `<!doctype html>

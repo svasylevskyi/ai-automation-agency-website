@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { prospectStatusLabels, type ProspectJob } from "@/lib/prospect";
 import { ReplyDraftEditor } from "./reply-draft-editor";
+import type { ReplyDelivery } from "@/lib/reply-delivery";
 
 export function ProspectAssistant({
   id,
@@ -10,12 +11,14 @@ export function ProspectAssistant({
   closed,
   enabled,
   job,
+  delivery = null,
 }: {
   id: string;
   version: number;
   closed: boolean;
   enabled: boolean;
   job: ProspectJob | null;
+  delivery?: ReplyDelivery | null;
 }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
@@ -49,9 +52,9 @@ export function ProspectAssistant({
     >
       <h2 id="prospect-title">Prospect assistant</h2>
       <p>
-        Internal preparation only. Review the original enquiry and adapt the
-        draft before replying. Nothing here sends an email or changes follow-up
-        fields.
+        Review the original enquiry and adapt the prepared draft. Sending
+        requires your explicit approval of the email preview. Follow-up
+        reminders are optional.
       </p>
       {!enabled && (
         <p className="notice">
@@ -98,6 +101,9 @@ export function ProspectAssistant({
             original={job.result.replyDraft}
             source={job.result.replySource}
             review={job.review}
+            enquiryVersion={version}
+            closed={closed}
+            delivery={delivery}
           />
         </>
       )}
