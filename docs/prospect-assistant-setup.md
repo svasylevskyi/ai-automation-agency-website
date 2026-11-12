@@ -4,6 +4,8 @@ The prospect assistant prepares an internal brief, discovery questions, a sugges
 
 Already running the loop? Follow the [manual AI reply setup](prospect-ai-replies.md) to add targeted first replies to it.
 
+Once a reply is reviewed, the owner can use the [preview-and-send flow](approved-replies.md) in admin. Preparing, saving or marking a draft ready does not send mail; the owner must approve the exact preview separately.
+
 The supplied workflow uses transparent rules, including a generic discovery route for **Other**. It does not use an LLM, research companies, send mail, qualify/reject customers, quote prices, or change enquiry status/notes/follow-up dates. Review and adapt the draft before replying yourself. Existing website receipts and owner notifications continue through Mailpit.
 
 ## 1. Merge and deploy

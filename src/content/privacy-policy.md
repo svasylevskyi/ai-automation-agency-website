@@ -12,6 +12,8 @@ When you send an enquiry, we receive your name, email address, optional company 
 
 We record the submission time and the version of the short enquiry data-use explanation you acknowledged. The owner may add private notes, a status, a next action and a follow-up date to manage the conversation. We keep an activity history of status changes, scheduled, changed, cleared or completed actions, note-update times, and email attempts and outcomes. Previous private-note text is not copied into that history. Confirmation-email wording is saved with the enquiry so retries use the same receipt. Please share only information needed to understand your enquiry. Do not include passwords, access credentials, special-category personal data or confidential information about clients or other people.
 
+When the owner reviews and sends a first reply through the website, we store its preview, approved wording, sender and recipient addresses, subject, reply address, sending attempts and provider acceptance reference with your enquiry. This supports review, prevents duplicate sending and records the conversation's next step. Reply bodies are not copied into the activity log. Any selected follow-up is an internal reminder, not an automatic customer message.
+
 Name and email are needed to receive and reply to an enquiry. A direct enquiry needs a short message; a complete attached assessment can supply that context instead. Company details and the optional free-text assessment fields are not required. If you do not supply the required fields, the form cannot be submitted. You can still browse the website and view an assessment result without identifying yourself.
 
 ## 3. The browser-based assessment

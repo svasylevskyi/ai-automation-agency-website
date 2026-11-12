@@ -16,6 +16,7 @@ import { checkProspect } from "./prospect.mjs";
 import { listenForEnquiryWebhooks } from "./enquiry-webhook.mjs";
 import { checkServiceEnquiry } from "./service-enquiry.mjs";
 import { checkResendMail } from "./resend-mail.mjs";
+import { checkApprovedReplies } from "./approved-replies.mjs";
 
 if (!new URL(process.env.DATABASE_URL).pathname.endsWith("_test"))
   throw new Error(
@@ -437,6 +438,7 @@ try {
   checks += followUpChecks;
   const prospectChecks = await checkProspect({ call, status, db });
   checks += prospectChecks;
+  checks += await checkApprovedReplies({ call, status, db });
   const retentionChecks = await checkRetention({ call, status, db });
   checks += retentionChecks;
   // A mail outage must not lose the saved enquiry; retry is idempotent once sent.

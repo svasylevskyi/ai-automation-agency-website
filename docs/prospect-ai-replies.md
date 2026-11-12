@@ -1,6 +1,6 @@
 # AI-assisted first replies in your existing n8n loop
 
-Use the native **OpenAI → Text → Message a Model** node to draft a first reply for owner review. The existing **Prepare brief and draft** node supplies the brief, discovery questions, next action and a rule-based reply for fallback. The owner can edit the selected reply, save it, mark it ready and copy it in admin. Sending remains a manual step.
+Use the native **OpenAI → Text → Message a Model** node to draft a first reply for owner review. The existing **Prepare brief and draft** node supplies the brief, discovery questions, next action and a rule-based reply for fallback. The owner can edit, save and mark the reply ready, then copy it or use the [explicit preview-and-send flow](approved-replies.md). The n8n workflow still cannot send replies.
 
 ## 1. Prepare the pilot
 

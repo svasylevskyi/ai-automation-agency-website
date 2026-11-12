@@ -194,6 +194,15 @@ export async function saveReplyDraft(
     );
     if (!parent.rowCount)
       throw new HttpError(404, "Enquiry no longer available.");
+    const approved = await client.query(
+      "SELECT id FROM reply_deliveries WHERE enquiry_id=$1 AND status <> 'preview'",
+      [id],
+    );
+    if (approved.rowCount)
+      throw new HttpError(
+        409,
+        "This first reply has already been approved. Its delivery record cannot be edited.",
+      );
     const job = (
       await client.query(
         `SELECT result->>'replyDraft' AS original, reply_text, reply_ready, reply_version
