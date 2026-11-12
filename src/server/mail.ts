@@ -3,6 +3,7 @@ import { transaction } from "./db";
 import { env } from "./env";
 import { recordActivity } from "./activity";
 import { confirmationPayloadSchema } from "../lib/confirmation";
+import { emailPayloadSchema } from "../lib/email-template";
 import {
   deliverMail,
   MailDeliveryError,
@@ -21,7 +22,7 @@ async function sendEnquiryMail(id: string, channel: Channel, manual = false) {
        AND (${channel}_status='pending'
          OR (${channel}_status='failed' AND ($4 OR ${channel}_attempted_at < now()-interval '5 minutes'))
          OR (${channel}_status='sending' AND ${channel}_attempted_at < now()-interval '5 minutes'))
-       RETURNING email,confirmation_payload,${channel}_attempts AS attempts`,
+       RETURNING email,confirmation_payload,notification_payload,${channel}_attempts AS attempts`,
       [id, claimId, manual && channel === "notification", manual],
     );
     if (!rows.length) return null;
@@ -44,8 +45,13 @@ async function sendEnquiryMail(id: string, channel: Channel, manual = false) {
           }
         : {
             to: config.NOTIFICATION_EMAIL,
-            subject: "New website enquiry",
-            text: `A new enquiry is saved in your owner inbox.\n\nOpen it securely: ${config.APP_URL}/admin/enquiries/${id}\n\nThis notification does not include the visitor's message or contact details.`,
+            ...(claim.notification_payload
+              ? emailPayloadSchema.parse(claim.notification_payload)
+              : {
+                  // Preserve the exact content of pre-template notifications on retry.
+                  subject: "New website enquiry",
+                  text: `A new enquiry is saved in your owner inbox.\n\nOpen it securely: ${config.APP_URL}/admin/enquiries/${id}\n\nThis notification does not include the visitor's message or contact details.`,
+                }),
           };
     acceptance = await deliverMail(config, {
       ...message,

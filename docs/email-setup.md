@@ -1,6 +1,6 @@
 # Live email: Google Workspace + Resend
 
-The website sends two transactional messages for a new enquiry: a private inbox link to the owner, and a generic acknowledgement to the visitor. Resend sends these over HTTPS. Google Workspace hosts the business inbox in Gmail and handles personal correspondence. Replies to acknowledgements go to the **Public email** configured in Owner area → Settings.
+The website sends two transactional messages for a new enquiry: a private inbox link to the owner, and a branded acknowledgement with a polite greeting to the visitor. Resend sends these over HTTPS. Google Workspace hosts the business inbox in Gmail and handles personal correspondence. Replies to acknowledgements go to the **Public email** configured in Owner area → Settings.
 
 Suggested addresses (change them consistently if you prefer different names):
 
@@ -54,7 +54,7 @@ This is an initial monitoring policy for the domain and, by default, its subdoma
 
 ## 5. Deploy the code, then switch live sending on
 
-First merge the PR and run the existing **Deploy website to Hetzner** workflow, keeping the existing SMTP/Mailpit configuration during this deployment. `MAIL_PROVIDER` defaults to `smtp`, so merely deploying does not enable Resend. No database migration is needed for this change.
+First merge the PR and run the existing **Deploy website to Hetzner** workflow, keeping the existing SMTP/Mailpit configuration during this deployment. `MAIL_PROVIDER` defaults to `smtp`, so merely deploying does not enable Resend. The deployment applies all outstanding database migrations, including the notification snapshot added with [branded email templates](email-templates.md).
 
 In Owner area → Settings, set the agency name to **Get Automated** and **Public email** to `hello@get-automated.ai`. This changes public contact links and the Reply-To saved with **new** receipts. Existing receipt snapshots retain their original wording and Reply-To. The login account address and notification recipient are independent; changing either of these mail settings does not change your admin login.
 

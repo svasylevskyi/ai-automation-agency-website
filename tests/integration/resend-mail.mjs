@@ -1,7 +1,64 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
+import { readFile } from "node:fs/promises";
+import { notificationMessage } from "../../src/lib/notification.ts";
 import { confirmationMessage } from "../../src/lib/confirmation.ts";
 import { processEnquiryMail, sendConfirmation } from "../../src/server/mail.ts";
+
+async function checkBrandedEmailUpgrade(db) {
+  const client = await db().connect();
+  const oldDescription =
+    "It contains general next steps and an optional booking link, without copying your name, message or assessment.";
+  try {
+    await client.query("BEGIN");
+    await client.query("CREATE SCHEMA integration_branded_email_upgrade");
+    await client.query(
+      "SET LOCAL search_path TO integration_branded_email_upgrade",
+    );
+    await client.query(
+      "CREATE TABLE enquiries (id int PRIMARY KEY, confirmation_payload jsonb)",
+    );
+    await client.query(
+      "CREATE TABLE legal_pages (slug text PRIMARY KEY,content text,version int,is_draft boolean,updated_at timestamptz DEFAULT now())",
+    );
+    const legacy = { subject: "Old receipt", text: "Saved before HTML" };
+    await client.query("INSERT INTO enquiries VALUES (1,$1)", [legacy]);
+    await client.query(
+      "INSERT INTO legal_pages(slug,content,version,is_draft) VALUES ('privacy',$1,5,false),('terms','Owner terms',8,false)",
+      [`Owner introduction. ${oldDescription} Owner ending.`],
+    );
+    await client.query(
+      await readFile(
+        new URL("../../migrations/010-branded-emails.sql", import.meta.url),
+        "utf8",
+      ),
+    );
+    const row = (await client.query("SELECT * FROM enquiries")).rows[0];
+    assert.equal(row.notification_payload, null);
+    assert.deepEqual(row.confirmation_payload, legacy);
+    const privacy = (
+      await client.query("SELECT * FROM legal_pages WHERE slug='privacy'")
+    ).rows[0];
+    assert.equal(privacy.version, 6);
+    assert.equal(privacy.is_draft, false);
+    assert.match(
+      privacy.content,
+      /^Owner introduction\. It may greet you by the name you supplied.*Owner ending\.$/,
+    );
+    assert.deepEqual(
+      (
+        await client.query(
+          "SELECT content,version FROM legal_pages WHERE slug='terms'",
+        )
+      ).rows[0],
+      { content: "Owner terms", version: 8 },
+    );
+    return 6;
+  } finally {
+    await client.query("ROLLBACK");
+    client.release();
+  }
+}
 
 export async function checkResendMail({ db }) {
   const id = randomUUID();
@@ -18,20 +75,35 @@ export async function checkResendMail({ db }) {
   const sentId = randomUUID();
   const requests = [];
   let rejectReceipt = true;
-  let checks = 0;
+  let checks = await checkBrandedEmailUpgrade(db);
   try {
     await db().query(
-      `INSERT INTO enquiries(id,submission_id,name,email,area,team_size,message,privacy_notice_version,confirmation_status,confirmation_payload)
-       VALUES($1,$2,'PRIVATE NAME','resend-visitor@example.test','sales','small','PRIVATE MESSAGE','enquiry-v4','pending',$3)`,
+      `INSERT INTO enquiries(id,submission_id,name,email,area,team_size,message,privacy_notice_version,confirmation_status,confirmation_payload,notification_payload)
+       VALUES($1,$2,'PRIVATE NAME','resend-visitor@example.test','sales','small','PRIVATE MESSAGE','enquiry-v4','pending',$3,$4)`,
       [
         id,
         randomUUID(),
         JSON.stringify(
-          confirmationMessage({
-            name: "Get Automated",
-            contactEmail: "hello@get-automated.ai",
-            bookingUrl: "",
-          }),
+          confirmationMessage(
+            {
+              name: "Get Automated",
+              contactEmail: "hello@get-automated.ai",
+              bookingUrl: "",
+            },
+            process.env.APP_URL,
+            "Test Visitor",
+          ),
+        ),
+        JSON.stringify(
+          notificationMessage(
+            {
+              name: "Get Automated",
+              contactEmail: "hello@get-automated.ai",
+              bookingUrl: "",
+            },
+            process.env.APP_URL,
+            id,
+          ),
         ),
       ],
     );
@@ -64,7 +136,15 @@ export async function checkResendMail({ db }) {
       JSON.stringify(requests),
       /PRIVATE NAME|PRIVATE MESSAGE/,
     );
-    checks += 9;
+    assert.match(receipt.payload.html, /Hello Test Visitor,/);
+    assert.match(receipt.payload.text, /Best regards,/);
+    assert.match(receipt.payload.html, /brand\/email-mark\.png/);
+    const notification = requests.find(
+      ({ payload }) => payload.to[0] === overrides.NOTIFICATION_EMAIL,
+    );
+    assert.match(notification.payload.html, /Review the enquiry/);
+    assert.doesNotMatch(notification.payload.html, /Test Visitor|PRIVATE/);
+    checks += 14;
 
     // Backoff prevents immediate retries; an aged failed attempt becomes eligible.
     await processEnquiryMail(id);
@@ -81,9 +161,10 @@ export async function checkResendMail({ db }) {
     assert.equal(row.confirmation_attempts, 2);
     assert.equal(requests.length, 3);
     assert.equal(requests[2].key, receipt.key);
+    assert.deepEqual(requests[2].payload, receipt.payload);
     await sendConfirmation(id, true);
     assert.equal(requests.length, 3);
-    checks += 6;
+    checks += 7;
 
     const { rows: events } = await db().query(
       "SELECT kind,details FROM enquiry_activity WHERE enquiry_id=$1 ORDER BY id",

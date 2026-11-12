@@ -18,11 +18,15 @@ const live = {
   NOTIFICATION_EMAIL: "hello@get-automated.ai",
 };
 const message = {
-  ...confirmationMessage({
-    name: "Get Automated",
-    contactEmail: "hello@get-automated.ai",
-    bookingUrl: "",
-  }),
+  ...confirmationMessage(
+    {
+      name: "Get Automated",
+      contactEmail: "hello@get-automated.ai",
+      bookingUrl: "",
+    },
+    "https://get-automated.ai",
+    "Stepan",
+  ),
   from: live.MAIL_FROM,
   to: "visitor@example.test",
   messageId: "<enquiry-confirmation-123@get-automated.ai>",
@@ -123,6 +127,7 @@ test("Resend sends receipts with the business Reply-To and stable retry keys", a
   assert.equal(payload.reply_to, "hello@get-automated.ai");
   assert.deepEqual(payload.to, [message.to]);
   assert.equal(payload.text, message.text);
+  assert.equal(payload.html, message.html);
   assert.deepEqual(payload.headers, {
     ...message.headers,
     "Message-ID": message.messageId,
