@@ -9,6 +9,8 @@ type Details = {
   channel?: string;
   attempt?: number;
   interrupted?: boolean;
+  providerMessageId?: string;
+  failureCode?: string;
   before?: { action: string; date: string };
   after?: { action: string; date: string };
 };
@@ -49,11 +51,11 @@ export function describeActivity(kind: string, details: Details) {
     case "mail_attempted":
       return `${channel}: sending attempt ${details.attempt}.`;
     case "mail_sent":
-      return `${channel}: accepted by mail server (attempt ${details.attempt}). This does not confirm inbox delivery or that it was read.`;
+      return `${channel}: accepted by email provider (attempt ${details.attempt}). This does not confirm inbox delivery or that it was read.${details.providerMessageId ? ` Provider reference: ${details.providerMessageId}.` : ""}`;
     case "mail_failed":
       if (details.interrupted)
         return `${channel}: attempt ${details.attempt} was interrupted. Delivery outcome is unknown; automatic retries have stopped.`;
-      return `${channel}: attempt ${details.attempt} failed.`;
+      return `${channel}: attempt ${details.attempt} failed.${details.failureCode ? ` Error: ${details.failureCode}.` : ""}`;
     default:
       return "Enquiry updated.";
   }
