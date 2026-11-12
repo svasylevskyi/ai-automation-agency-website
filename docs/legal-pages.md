@@ -14,7 +14,7 @@ These fields are public presentation settings. They do not configure SMTP, the `
 
 ## Editing
 
-Admin → Settings now has separate Privacy Policy and Website Terms cards below the existing settings form. Each has a title, text editor, preview and Save button. Use blank lines for paragraphs, `## ` for headings and `- ` for bullets. Other syntax, HTML and embedded content remain literal text; they are never executed. The preview uses the same renderer as the public page.
+Admin → Legal docs contains Privacy Policy (`/admin/legal/privacy`) and Website Terms (`/admin/legal/terms`), each on its own page with a title, text editor, preview and Save button. Agency details and the custom policy URL are under Settings → Agency identity (`/admin/agency-identity`). Use blank lines for paragraphs, `## ` for headings and `- ` for bullets. Other syntax, HTML and embedded content remain literal text; they are never executed. The preview uses the same renderer as the public page.
 
 Saving replaces the current public text immediately. Each page saves independently. A version check rejects stale updates from another window without discarding the current editor's text. The revision number is an edit counter, not an accessible document history; keep copies of older wording if needed.
 
@@ -34,7 +34,7 @@ The existing checkbox remains an acknowledgement of the short enquiry data-use e
 
 Migration `003-legal-pages.sql` creates `legal_pages`. The migration script seeds the two complete texts only when their rows do not exist. Re-running migrations or deploying future code preserves all owner edits. Migration 004 refreshes only the exact untouched version-1 review drafts to describe receipt emails and activity history; customised pages must be reviewed manually for these additions. Existing enquiries, settings, owner credentials and custom Privacy Policy URLs are preserved.
 
-Migration 008 fills the remaining identity placeholders in stored pages with the supplied legal name, brand and production URL. It also adds the production URL to the standard privacy introduction. The replacements preserve surrounding admin edits and each page's draft setting. A changed page gets a new revision and update date, so an editor opened before deployment must reload before saving. For fully customised wording with no matching placeholders or standard introduction, review the identity in Admin → Settings.
+Migration 008 fills the remaining identity placeholders in stored pages with the supplied legal name, brand and production URL. It also adds the production URL to the standard privacy introduction. The replacements preserve surrounding admin edits and each page's draft setting. A changed page gets a new revision and update date, so an editor opened before deployment must reload before saving. For fully customised wording with no matching placeholders or standard introduction, review the identity in Admin → Legal docs.
 
 The existing deployment backs up the database and applies the migration automatically. No new environment variables or dependencies are required. Local upgrades need `npm run db:migrate` before starting the app. The release package already includes `src/content/`, so first-run seeding also works from an unpacked release.
 
@@ -45,7 +45,7 @@ Local validation passed TypeScript, the production build, 21 unit/security/DOM t
 Visual browser QA remains unverified because the managed preview launcher supplies Vite-only flags to Next.js. After deploying to the test environment:
 
 1. Open both pages from the footer and from the form; check the draft banner, contents links and mobile/print layout.
-2. Edit a paragraph in Admin → Settings, preview it, save, and reload the public page.
+2. Edit a paragraph in Admin → Legal docs → Privacy Policy or Website Terms, preview it, save, and reload the public page.
 3. Confirm that the other legal page remains unchanged. In two admin tabs, try saving an older edit and check that it is rejected while keeping its text.
 4. Leave the custom Privacy Policy URL blank for the built-in page. If testing an override, check footer/form/guide links and then clear it again.
 5. Open a legal link while drafting an enquiry; the form tab should retain the visitor's answers.

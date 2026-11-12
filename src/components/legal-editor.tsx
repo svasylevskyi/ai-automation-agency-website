@@ -85,8 +85,10 @@ export function LegalEditor({
       </a>
       {privacyOverride && (
         <p className="notice">
-          A custom Privacy Policy URL is set above. Website links use that URL.
-          Clear it and save settings to use this built-in page.
+          A custom Privacy Policy URL is set in{" "}
+          <a href="/admin/agency-identity">Settings → Agency identity</a>.
+          Website links use that URL. Clear it there and save settings to use
+          this built-in page.
         </p>
       )}
       <p className="privacy-note">

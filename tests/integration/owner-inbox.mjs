@@ -129,10 +129,49 @@ try {
     assert.match(html, new RegExp(`rel="canonical" href="${base}/${slug}"`));
     checks += 7;
   }
-  const settingsPage = await call("/admin/settings", "GET", undefined, true);
+  for (const path of [
+    "/admin/agency-identity",
+    "/admin/admin-account",
+    "/admin/legal/privacy",
+    "/admin/legal/terms",
+  ]) {
+    const guarded = await call(path);
+    status(guarded, 307);
+    assert.equal(guarded.headers.get("location"), "/admin/login");
+    checks++;
+  }
+  for (const [oldPath, newPath] of [
+    ["/admin/settings", "/admin/agency-identity"],
+    ["/admin/account", "/admin/admin-account"],
+  ]) {
+    const moved = await call(oldPath, "GET", undefined, true);
+    status(moved, 308);
+    assert.equal(moved.headers.get("location"), newPath);
+    checks++;
+  }
+  const settingsPage = await call(
+    "/admin/agency-identity",
+    "GET",
+    undefined,
+    true,
+  );
   status(settingsPage, 200);
-  assert.match(await settingsPage.text(), /Save Privacy Policy/);
-  checks++;
+  const settingsHtml = await settingsPage.text();
+  assert.match(settingsHtml, /Save settings/);
+  assert.doesNotMatch(settingsHtml, /Save Privacy Policy|Save Website Terms/);
+  checks += 2;
+  for (const [slug, title, other] of [
+    ["privacy", "Privacy Policy", "Website Terms"],
+    ["terms", "Website Terms", "Privacy Policy"],
+  ]) {
+    const editor = await call(`/admin/legal/${slug}`, "GET", undefined, true);
+    status(editor, 200);
+    const editorHtml = await editor.text();
+    assert.match(editorHtml, new RegExp(`Save ${title}`));
+    assert.doesNotMatch(editorHtml, new RegExp(`Save ${other}|Save settings`));
+    checks += 2;
+  }
+  status(await call("/admin/legal/unknown", "GET", undefined, true), 404);
   const originalPrivacy = legalOriginals.find(
     (page) => page.slug === "privacy",
   );
@@ -689,7 +728,7 @@ try {
   assert(cookie);
   checks++;
   const rotatedCookie = cookie;
-  status(await call("/admin/account", "GET", undefined, true), 200);
+  status(await call("/admin/admin-account", "GET", undefined, true), 200);
   cookie = otherCookie;
   status(await call("/api/admin/password", "POST", passwordInput, true), 401);
   cookie = previousCookie;

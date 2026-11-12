@@ -1,16 +1,6 @@
 import { requireOwner } from "@/server/owner-page";
-import { PasswordForm } from "@/components/password-form";
+import { permanentRedirect } from "next/navigation";
 export default async function Account() {
-  const session = await requireOwner();
-  return (
-    <>
-      <div className="admin-title">
-        <div>
-          <h1>Your account</h1>
-          <p>Signed in as {session.user.email}</p>
-        </div>
-      </div>
-      <PasswordForm />
-    </>
-  );
+  await requireOwner();
+  permanentRedirect("/admin/admin-account");
 }

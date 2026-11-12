@@ -4,7 +4,7 @@ import { JSDOM } from "jsdom";
 import { act, createElement } from "react";
 
 const dom = new JSDOM('<div id="root"></div>', {
-  url: "http://localhost:3000/admin/settings",
+  url: "http://localhost:3000/admin/legal/privacy",
 });
 for (const key of [
   "window",
