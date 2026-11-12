@@ -1,6 +1,6 @@
 # Live email: Google Workspace + Resend
 
-The website sends two transactional messages for a new enquiry: a private inbox link to the owner, and a branded acknowledgement with a polite greeting to the visitor. Resend sends these over HTTPS. Google Workspace hosts the business inbox in Gmail and handles personal correspondence. Replies to acknowledgements go to the **Public email** configured in Owner area → Settings.
+The website sends two transactional messages for a new enquiry: a private inbox link to the owner, and a branded acknowledgement with a polite greeting to the visitor. Resend sends these over HTTPS. Google Workspace hosts the business inbox in Gmail and handles personal correspondence. Replies to acknowledgements go to the **Public email** configured in Owner area → Settings → Agency identity.
 
 Suggested addresses (change them consistently if you prefer different names):
 
@@ -56,7 +56,7 @@ This is an initial monitoring policy for the domain and, by default, its subdoma
 
 First merge the PR and run the existing **Deploy website to Hetzner** workflow, keeping the existing SMTP/Mailpit configuration during this deployment. `MAIL_PROVIDER` defaults to `smtp`, so merely deploying does not enable Resend. The deployment applies all outstanding database migrations, including the notification snapshot added with [branded email templates](email-templates.md).
 
-In Owner area → Settings, set the agency name to **Get Automated** and **Public email** to `hello@get-automated.ai`. This changes public contact links and the Reply-To saved with **new** receipts. Existing receipt snapshots retain their original wording and Reply-To. The login account address and notification recipient are independent; changing either of these mail settings does not change your admin login.
+In Owner area → Settings → Agency identity, set the agency name to **Get Automated** and **Public email** to `hello@get-automated.ai`. This changes public contact links and the Reply-To saved with **new** receipts. Existing receipt snapshots retain their original wording and Reply-To. The login account address and notification recipient are independent; changing either of these mail settings does not change your admin login.
 
 Review pending/failed messages and remove only known disposable test enquiries through the owner inbox. Eligible old messages can be retried using the new provider; do not enable live delivery with a test backlog you do not intend to send. The read-only preflight below reports counts. Also review the editable Privacy Policy before live use: replace the test-only mail description/provider placeholder with the actual Resend and Google Workspace arrangements, including relevant processing and retention details. This release does not overwrite owner-edited legal pages.
 

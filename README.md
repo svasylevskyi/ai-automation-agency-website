@@ -43,7 +43,7 @@ Mailpit captures outgoing emails locally; nothing is sent to a real email addres
 | `npm run mail:check`                     | Read-only mail configuration, Reply-To and pending-message preflight (no email sent)            |
 | `npm run maintenance`                      | Recover mail for up to 100 enquiries and remove expired request limits/sessions |
 
-Use **Owner area → Account** to change your password with the current password. Other sessions are revoked; the current session is rotated. The admin area has no public registration, invitation or email password-reset endpoint. Forgotten-password recovery requires local/server terminal access. Owner notifications and visitor confirmations are attempted after saving each new enquiry. The inbox shows their separate delivery states and retry actions. The Hetzner maintenance timer recovers eligible attempts every five minutes, up to five automatic attempts per channel. Resend protects identical retries for 24 hours; SMTP or a retry outside that window can result in a duplicate on recovery; the saved enquiry remains available even when delivery fails.
+Use **Owner area → Settings → Admin account** to change your password with the current password. Other sessions are revoked; the current session is rotated. The admin area has no public registration, invitation or email password-reset endpoint. Forgotten-password recovery requires local/server terminal access. Owner notifications and visitor confirmations are attempted after saving each new enquiry. The inbox shows their separate delivery states and retry actions. The Hetzner maintenance timer recovers eligible attempts every five minutes, up to five automatic attempts per channel. Resend protects identical retries for 24 hours; SMTP or a retry outside that window can result in a duplicate on recovery; the saved enquiry remains available even when delivery fails.
 
 ## Guided workflow assessment
 
@@ -57,7 +57,7 @@ Admin opens on **Needs attention**, showing new enquiries and actions due today 
 
 See [follow-up behavior, mail recovery and deployment review](docs/enquiry-follow-up.md) and [branded email templates](docs/email-templates.md).
 
-For production, follow [Google Workspace + Resend setup](docs/email-setup.md). Set `MAIL_PROVIDER=resend`, `RESEND_API_KEY`, `MAIL_FROM` and `NOTIFICATION_EMAIL` on the server, and the working business reply address in Owner area → Settings. Resend sends notifications/receipts; Gmail handles incoming replies and personal correspondence. Without `MAIL_PROVIDER`, the existing SMTP configuration remains in use. The website does not need Gmail credentials.
+For production, follow [Google Workspace + Resend setup](docs/email-setup.md). Set `MAIL_PROVIDER=resend`, `RESEND_API_KEY`, `MAIL_FROM` and `NOTIFICATION_EMAIL` on the server, and the working business reply address in Owner area → Settings → Agency identity. Resend sends notifications/receipts; Gmail handles incoming replies and personal correspondence. Without `MAIL_PROVIDER`, the existing SMTP configuration remains in use. The website does not need Gmail credentials.
 
 ## Prospect assistant
 
@@ -73,13 +73,15 @@ To trigger an n8n workflow on submission, set the server-side `N8N_ENQUIRY_WEBHO
 
 ## Branding and settings
 
-Open **Owner area → Settings** to update the agency name, tagline, search/sharing description, logo, public email, booking URL and optional custom Privacy Policy URL. These changes apply on the next page load without a rebuild. Logos are limited to 2 MB PNG/JPEG/WebP, decoded and re-encoded as PNG, and stored in PostgreSQL; SVG uploads are rejected. Save settings after upload to publish the logo. A checkbox supports logos that already include the agency name.
+Settings contains Agency identity (`/admin/agency-identity`), Admin account (`/admin/admin-account`) and Retention & backups (`/admin/retention`), in that order. Legal docs has separate Privacy Policy (`/admin/legal/privacy`) and Website Terms (`/admin/legal/terms`) editors. The old `/admin/settings` and `/admin/account` URLs redirect to their replacements. No database migration or server setting change is needed for this rearrangement.
+
+Open **Owner area → Settings → Agency identity** to update the agency name, tagline, search/sharing description, logo, public email, booking URL and optional custom Privacy Policy URL. These changes apply on the next page load without a rebuild. Logos are limited to 2 MB PNG/JPEG/WebP, decoded and re-encoded as PNG, and stored in PostgreSQL; SVG uploads are rejected. Save settings after upload to publish the logo. A checkbox supports logos that already include the agency name.
 
 [`src/config/brand.ts`](src/config/brand.ts) supplies initial branding defaults. Once migrated, database settings are authoritative; editing those defaults will not overwrite saved settings. Original drafts retain their historical identity. The public email and server-side notification recipient are separate settings.
 
 ## Privacy Policy and Website Terms
 
-Built-in pages are available at `/privacy` and `/terms`, with links in the footer, guide and enquiry form. Edit each page independently under **Owner area → Settings**, using the new title/text fields and preview. Leave the custom Privacy Policy URL blank to use `/privacy`; an existing external URL still overrides the public links.
+Built-in pages are available at `/privacy` and `/terms`, with links in the footer, guide and enquiry form. Edit each page independently under **Owner area → Legal docs**, using the new title/text fields and preview. Leave the custom Privacy Policy URL blank to use `/privacy`; an existing external URL still overrides the public links.
 
 Both pages include full initial draft wording and clear placeholders for the business details and operating arrangements still to be confirmed. They are publicly visible review drafts and remain excluded from search indexing until marked ready. Saving changes updates the public page immediately; redeployment does not overwrite admin edits. See [legal page editing, field explanations and launch decisions](docs/legal-pages.md).
 

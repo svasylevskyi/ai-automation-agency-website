@@ -1,7 +1,6 @@
-import { Arrow } from "@/components/arrow";
 import Link from "next/link";
 import { requireOwner } from "@/server/owner-page";
-import { SignOut } from "@/components/admin-forms";
+import { AdminNavigation } from "@/components/admin-navigation";
 export default async function ProtectedLayout({
   children,
 }: {
@@ -17,17 +16,7 @@ export default async function ProtectedLayout({
         <Link className="admin-wordmark" href="/admin">
           Owner workspace<span>One useful next step.</span>
         </Link>
-        <nav aria-label="Owner navigation">
-          <Link href="/admin">Enquiries</Link>
-          <Link href="/admin/settings">Settings</Link>
-          <Link href="/admin/retention">Retention & backups</Link>
-          <Link href="/admin/account">Account</Link>
-          <a href="/" target="_blank" rel="noopener noreferrer">
-            View website <Arrow />
-            <span className="sr-only"> (opens in a new tab)</span>
-          </a>
-          <SignOut />
-        </nav>
+        <AdminNavigation />
       </header>
       <main id="admin-main" className="admin-main" tabIndex={-1}>
         {children}

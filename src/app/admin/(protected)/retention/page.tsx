@@ -23,6 +23,7 @@ export default async function RetentionPage() {
     <>
       <div className="admin-title">
         <div>
+          <div className="eyebrow">Settings</div>
           <h1>Retention & backups</h1>
           <p>
             Decide when closed conversations expire and check the latest

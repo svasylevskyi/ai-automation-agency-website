@@ -17,9 +17,9 @@ async function request(url: string, method: string, data?: unknown) {
             .map(([key, errors]) => `${key}: ${(errors as string[]).join(" ")}`)
             .join(" · ")
         : body.error?.message ||
-            body.error ||
-            body.message ||
-            "The change could not be saved.",
+          body.error ||
+          body.message ||
+          "The change could not be saved.",
     );
   return body;
 }
@@ -95,7 +95,7 @@ export function SignOut() {
           }
         }}
       >
-        Sign out
+        Sign Out
       </button>
       <span role="alert">{error}</span>
     </div>
@@ -282,9 +282,10 @@ export function SettingsForm({
           maxLength={500}
         />
         <small>
-          Leave blank to use the built-in /privacy page edited below. Set an
-          HTTPS URL only if your policy is hosted elsewhere; it overrides policy
-          links in the footer, guide and enquiry form.
+          Leave blank to use the built-in /privacy page, edited under Legal docs
+          → Privacy Policy. Set an HTTPS URL only if your policy is hosted
+          elsewhere; it overrides policy links in the footer, guide and enquiry
+          form.
         </small>
       </label>
       <p className="privacy-note">
