@@ -1,7 +1,14 @@
 "use client";
 
 import { useRef, useState, type FormEvent } from "react";
-import { legalPages, legalPlaceholders, type LegalPage } from "@/lib/legal";
+import {
+  legalPages,
+  legalKeys,
+  resolveLegalText,
+  unresolvedLegalKeys,
+  type LegalPage,
+} from "@/lib/legal";
+import { legalField } from "@/lib/legal-fields";
 import { LegalContent } from "./legal-content";
 
 export function LegalEditor({
@@ -17,7 +24,12 @@ export function LegalEditor({
   const [error, setError] = useState(false);
   const [fields, setFields] = useState<Record<string, string[]>>({});
   const feedback = useRef<HTMLDivElement>(null);
-  const placeholders = legalPlaceholders(page.title + "\n" + page.content);
+  const keys = legalKeys(page.title + "\n" + page.content);
+  const groups = [...new Set(keys.map((key) => legalField(key).group))];
+  const missing = unresolvedLegalKeys(
+    page.title + "\n" + page.content,
+    page.values,
+  );
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (pending) return;
@@ -34,6 +46,8 @@ export function LegalEditor({
           content: page.content,
           isDraft: page.isDraft,
           version: page.version,
+          values: page.values,
+          valuesVersion: page.valuesVersion,
         }),
       });
       const data = await response.json();
@@ -45,8 +59,12 @@ export function LegalEditor({
         ...current,
         version: data.version,
         updatedAt: data.updatedAt,
+        values: data.values,
+        valuesVersion: data.valuesVersion,
       }));
-      setMessage("Page saved. The built-in page now shows this text.");
+      setMessage(
+        "Page saved. The public pages now use the saved text and shared details.",
+      );
     } catch (failure) {
       setError(true);
       setMessage(
@@ -114,7 +132,7 @@ export function LegalEditor({
             {fieldError("title")}
           </label>
           <label className="field">
-            <span>Page text</span>
+            <span>Page text template</span>
             <textarea
               required
               minLength={100}
@@ -130,12 +148,70 @@ export function LegalEditor({
           <p className="privacy-note" id={`${page.slug}-format`}>
             Use blank lines for paragraphs, ## for headings, and - for bullet
             points. HTML and other markup are displayed as text. This is a text
-            editor, not a code editor.
+            editor, not a code editor. Keep placeholders such as{" "}
+            {"{CONTACT_EMAIL}"} in the text and fill their values below. A new
+            uppercase placeholder creates its own field.
           </p>
-          {placeholders.length > 0 && (
-            <p className="notice">
-              Details to complete: {placeholders.join(", ")}
-            </p>
+          {keys.length > 0 && (
+            <div className="legal-placeholder-fields">
+              <h3>Details used in this document</h3>
+              <p className="privacy-note">
+                Values are shared by Privacy Policy and Website Terms. Saving a
+                shared value updates both documents wherever that placeholder is
+                used. Clearing a required value returns affected pages to draft.
+                These fields update legal wording only, not account, email or
+                server settings.
+              </p>
+              {groups.map((group) => (
+                <fieldset key={group} className="legal-field-group">
+                  <legend>{group}</legend>
+                  {keys
+                    .filter((key) => legalField(key).group === group)
+                    .map((key) => {
+                      const definition = legalField(key);
+                      const id = `${page.slug}-value-${key}`;
+                      const props = {
+                        id,
+                        name: key,
+                        value: page.values[key] ?? "",
+                        maxLength: 4000,
+                        "aria-describedby": `${id}-help`,
+                        "aria-invalid": !page.isDraft && missing.includes(key),
+                        onChange: (
+                          event: React.ChangeEvent<
+                            HTMLInputElement | HTMLTextAreaElement
+                          >,
+                        ) =>
+                          setPage((current) => ({
+                            ...current,
+                            values: {
+                              ...current.values,
+                              [key]: event.target.value,
+                            },
+                          })),
+                      };
+                      return (
+                        <label key={key} className="field" htmlFor={id}>
+                          <span>
+                            {definition.label} <code>{`{${key}}`}</code>
+                          </span>
+                          {definition.multiline ? (
+                            <textarea {...props} rows={3} />
+                          ) : (
+                            <input {...props} type="text" />
+                          )}
+                          <small id={`${id}-help`} className="privacy-note">
+                            {definition.help ||
+                              "Replaces this placeholder everywhere it appears in either document."}
+                            {missing.includes(key) && " Not filled in yet."}
+                          </small>
+                        </label>
+                      );
+                    })}
+                </fieldset>
+              ))}
+              {fieldError("values")}
+            </div>
           )}
           <label className="check-field">
             <input
@@ -148,15 +224,15 @@ export function LegalEditor({
             <span>Mark this page as a draft</span>
           </label>
           <p className="privacy-note" id={`${page.slug}-draft-help`}>
-            Remove this mark only after replacing placeholders and reviewing the
-            wording and actual business arrangements.
+            Remove this mark only after filling all placeholder fields and
+            reviewing the wording and actual business arrangements.
           </p>
           {fieldError("isDraft")}
           <details className="legal-preview">
-            <summary>Preview unsaved text</summary>
-            <h3>{page.title}</h3>
+            <summary>Preview with filled details</summary>
+            <h3>{resolveLegalText(page.title, page.values)}</h3>
             <LegalContent
-              content={page.content}
+              content={resolveLegalText(page.content, page.values)}
               idPrefix={`${page.slug}-preview`}
             />
           </details>

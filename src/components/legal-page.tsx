@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import { getBrand } from "@/server/settings";
 import { env } from "@/server/env";
 import { getLegalPage } from "@/server/legal";
-import { legalPages, legalPlaceholders, type LegalSlug } from "@/lib/legal";
+import {
+  legalPages,
+  unresolvedLegalKeys,
+  resolveLegalText,
+  type LegalSlug,
+} from "@/lib/legal";
 import { parseLegalContent } from "@/lib/legal-content";
 import { SiteHeader } from "./site-header";
 import { SiteFooter } from "./site-footer";
@@ -13,15 +18,16 @@ export async function legalMetadata(slug: LegalSlug): Promise<Metadata> {
   const index =
     !!brand.siteUrl &&
     !page.isDraft &&
-    !legalPlaceholders(page.title + page.content).length;
+    !unresolvedLegalKeys(page.title + "\n" + page.content, page.values).length;
+  const title = resolveLegalText(page.title, page.values);
   const canonical = new URL(legalPages[slug].path, env().APP_URL).toString();
   return {
-    title: `${page.title} | ${brand.name}`,
+    title: `${title} | ${brand.name}`,
     description: legalPages[slug].description,
     robots: { index, follow: index },
     alternates: { canonical },
     openGraph: {
-      title: `${page.title} | ${brand.name}`,
+      title: `${title} | ${brand.name}`,
       description: legalPages[slug].description,
       url: canonical,
     },
@@ -30,7 +36,11 @@ export async function legalMetadata(slug: LegalSlug): Promise<Metadata> {
 export async function LegalDocument({ slug }: { slug: LegalSlug }) {
   const [brand, page] = await Promise.all([getBrand(), getLegalPage(slug)]);
   const draft =
-    page.isDraft || legalPlaceholders(page.title + page.content).length > 0;
+    page.isDraft ||
+    unresolvedLegalKeys(page.title + "\n" + page.content, page.values).length >
+      0;
+  const title = resolveLegalText(page.title, page.values);
+  const content = resolveLegalText(page.content, page.values);
   return (
     <>
       <a className="skip" href="#legal-main">
@@ -38,7 +48,7 @@ export async function LegalDocument({ slug }: { slug: LegalSlug }) {
       </a>
       <SiteHeader brand={brand} />
       <main className="wrap legal-document" id="legal-main" tabIndex={-1}>
-        <h1>{page.title}</h1>
+        <h1>{title}</h1>
         <p className="legal-date">
           Updated{" "}
           <time dateTime={page.updatedAt}>
@@ -64,7 +74,7 @@ export async function LegalDocument({ slug }: { slug: LegalSlug }) {
         <nav className="legal-contents" aria-label="On this page">
           <strong>On this page</strong>
           <ul>
-            {parseLegalContent(page.content).map((block, index) =>
+            {parseLegalContent(content).map((block, index) =>
               block.type === "heading" ? (
                 <li key={index}>
                   <a href={`#legal-section-${index}`}>{block.text}</a>
@@ -73,7 +83,7 @@ export async function LegalDocument({ slug }: { slug: LegalSlug }) {
             )}
           </ul>
         </nav>
-        <LegalContent content={page.content} />
+        <LegalContent content={content} />
         {slug === "privacy" && (
           <p className="legal-authority">
             Data protection authority in Poland:{" "}

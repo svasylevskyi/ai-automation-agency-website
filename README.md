@@ -83,9 +83,9 @@ Open **Owner area → Settings → Agency identity** to update the agency name, 
 
 ## Privacy Policy and Website Terms
 
-Built-in pages are available at `/privacy` and `/terms`, with links in the footer, guide and enquiry form. Edit each page independently under **Owner area → Legal docs**, using the new title/text fields and preview. Leave the custom Privacy Policy URL blank to use `/privacy`; an existing external URL still overrides the public links.
+Built-in pages are available at `/privacy` and `/terms`, with links in the footer, guide and enquiry form. Edit each template under **Owner area → Legal docs**, with grouped fields for `{PLACEHOLDERS}` and a resolved preview. Shared business and contact details update both pages. Leave the custom Privacy Policy URL blank to use `/privacy`; an existing external URL still overrides the public links.
 
-Both pages include full initial draft wording and clear placeholders for the business details and operating arrangements still to be confirmed. They are publicly visible review drafts and remain excluded from search indexing until marked ready. Saving changes updates the public page immediately; redeployment does not overwrite admin edits. See [legal page editing, field explanations and launch decisions](docs/legal-pages.md).
+Migration `012` replaces the original drafts once, as authorised by the owner, and pre-fills the confirmed business details and production suppliers. Both refreshed pages start as publicly visible review drafts and remain excluded from search indexing until marked ready. Log retention is still unconfirmed: fill `{LOG_RETENTION}` before marking the Privacy Policy ready. Saving changes updates the public page immediately; subsequent deployments preserve admin edits. See [legal page editing, field explanations and launch decisions](docs/legal-pages.md).
 
 ## Structure
 

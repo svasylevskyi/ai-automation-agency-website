@@ -502,6 +502,27 @@
 .legal-editor fieldset > .button {
   margin-top: 24px;
 }
+.legal-placeholder-fields {
+  margin-block: 28px;
+}
+.legal-editor .legal-field-group {
+  margin-top: 24px;
+  padding: 18px;
+  border: 1px solid #ddd5eb;
+  border-radius: 12px;
+}
+.legal-field-group legend {
+  padding-inline: 8px;
+  font-weight: 700;
+}
+.legal-field-group code {
+  display: block;
+  font-size: 0.75rem;
+  overflow-wrap: anywhere;
+}
+.legal-field-group textarea {
+  font-family: inherit;
+}
 .legal-preview {
   margin-top: 24px;
   border: 1px solid #ddd5eb;

@@ -5,7 +5,8 @@ import type { LegalPage, LegalSlug } from "@/lib/legal";
 export const getLegalPage = cache(
   async (slug: LegalSlug): Promise<LegalPage> => {
     const { rows } = await db().query(
-      "SELECT slug,title,content,is_draft,version,updated_at FROM legal_pages WHERE slug=$1",
+      `SELECT p.*, d.data AS values, d.version AS values_version
+       FROM legal_pages p CROSS JOIN legal_details d WHERE p.slug=$1 AND d.singleton`,
       [slug],
     );
     if (!rows.length)
@@ -18,6 +19,8 @@ export const getLegalPage = cache(
       isDraft: row.is_draft,
       version: row.version,
       updatedAt: row.updated_at.toISOString(),
+      values: row.values,
+      valuesVersion: row.values_version,
     };
   },
 );

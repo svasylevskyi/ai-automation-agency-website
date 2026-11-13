@@ -18,20 +18,20 @@ export async function checkLegalIdentity(db) {
       ),
     );
     const expected = [];
-    for (const [slug, file] of [
-      ["privacy", "privacy-policy.md"],
-      ["terms", "website-terms.md"],
-    ]) {
-      const content = await readFile(
-        new URL("../../src/content/" + file, import.meta.url),
-        "utf8",
-      );
-      const legacy = content
-        .replaceAll("Stepan Vasylevskyi - InfoTech Consulting", "[LEGAL_NAME]")
-        .replaceAll("Get Automated", "[TRADING_NAME]")
-        .replaceAll(
-          "https://get-automated.ai",
-          slug === "privacy" ? "this website" : "[WEBSITE_URL]",
+    for (const slug of ["privacy", "terms"]) {
+      // Freeze migration 008's historical input rather than deriving it from
+      // today's editable templates.
+      const legacy =
+        slug === "privacy"
+          ? "This Privacy Policy explains how personal data is handled when you visit this website, and contact [LEGAL_NAME], operating as [TRADING_NAME]."
+          : "[LEGAL_NAME] operates [TRADING_NAME] at [WEBSITE_URL].";
+      const content = legacy
+        .replaceAll("[LEGAL_NAME]", "Stepan Vasylevskyi - InfoTech Consulting")
+        .replaceAll("[TRADING_NAME]", "Get Automated")
+        .replaceAll("[WEBSITE_URL]", "https://get-automated.ai")
+        .replace(
+          "when you visit this website,",
+          "when you visit https://get-automated.ai,",
         );
       const amendment = "\n\nOwner's additional wording.";
       await client.query(

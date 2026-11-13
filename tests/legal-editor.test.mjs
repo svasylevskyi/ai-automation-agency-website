@@ -30,7 +30,9 @@ const root = createRoot(document.getElementById("root"));
 const initial = {
   slug: "privacy",
   title: "Privacy Policy",
-  content: "## Controller\n\n[LEGAL_NAME] ".repeat(6),
+  content: "## Controller\n\n{LEGAL_NAME} ".repeat(6),
+  values: { LEGAL_NAME: "Example agency" },
+  valuesVersion: 1,
   isDraft: true,
   version: 1,
   updatedAt: "2026-11-06T12:00:00.000Z",
@@ -41,7 +43,12 @@ let calls = [],
 globalThis.fetch = async (url, options) => {
   calls.push({ url, ...JSON.parse(options.body) });
   return result === "success"
-    ? Response.json({ version: 2, updatedAt: "2026-11-06T12:01:00.000Z" })
+    ? Response.json({
+        version: 2,
+        updatedAt: "2026-11-06T12:01:00.000Z",
+        values: calls.at(-1).values,
+        valuesVersion: 2,
+      })
     : Response.json(
         {
           error:
@@ -58,10 +65,41 @@ try {
       ),
     );
     assert.match(document.body.textContent, /custom Privacy Policy URL/);
-    assert.match(document.body.textContent, /\[LEGAL_NAME\]/);
+    assert.match(document.body.textContent, /\{LEGAL_NAME\}/);
+    assert.equal(
+      document.querySelector('[name="LEGAL_NAME"]').value,
+      "Example agency",
+    );
+    assert.match(
+      document.querySelector(".legal-preview").textContent,
+      /Example agency/,
+    );
+    assert.equal(
+      document.querySelector(".legal-field-group legend").textContent,
+      "Business identity",
+    );
+    const setInput = async (element, value) =>
+      act(async () => {
+        Object.getOwnPropertyDescriptor(
+          HTMLInputElement.prototype,
+          "value",
+        ).set.call(element, value);
+        element.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+    await setInput(
+      document.querySelector('[name="LEGAL_NAME"]'),
+      "Changed agency <script>literal</script>",
+    );
+    assert.equal(document.querySelector(".legal-preview script"), null);
+    assert.match(
+      document.querySelector(".legal-preview").textContent,
+      /Changed agency <script>/,
+    );
     assert.equal(document.querySelector("a").getAttribute("target"), "_blank");
     const textarea = document.querySelector("textarea");
-    const content = "## Updated draft\n\n" + "Useful policy text. ".repeat(12);
+    const content =
+      "## Updated draft\n\n{LEGAL_NAME}\n\n{CUSTOM_FIELD}\n\n" +
+      "Useful policy text. ".repeat(12);
     await act(async () => {
       Object.getOwnPropertyDescriptor(
         HTMLTextAreaElement.prototype,
@@ -73,6 +111,7 @@ try {
       document.querySelector(".legal-preview h2").textContent,
       "Updated draft",
     );
+    assert(document.querySelector('[name="CUSTOM_FIELD"]'));
     await act(async () =>
       document
         .querySelector("form")
@@ -83,6 +122,11 @@ try {
     assert.equal(calls[0].url, "/api/admin/legal/privacy");
     assert.equal(calls[0].content, content);
     assert.equal(calls[0].version, 1);
+    assert.equal(
+      calls[0].values.LEGAL_NAME,
+      "Changed agency <script>literal</script>",
+    );
+    assert.equal(calls[0].valuesVersion, 1);
     assert.match(document.body.textContent, /Saved revision 2/);
     result = "conflict";
     await act(async () =>
@@ -93,11 +137,16 @@ try {
         ),
     );
     assert.equal(calls[1].version, 2);
+    assert.equal(calls[1].valuesVersion, 2);
     assert.match(
       document.querySelector(".notice.error").textContent,
       /Copy your edits/,
     );
     assert.equal(textarea.value, content);
+    assert.equal(
+      document.querySelector('[name="LEGAL_NAME"]').value,
+      "Changed agency <script>literal</script>",
+    );
     assert.equal(document.querySelector("button").disabled, false);
   });
 } finally {

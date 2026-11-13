@@ -9,6 +9,7 @@ import { issueChallenge } from "../../src/server/spam.ts";
 import { recommendAssessment } from "../../src/lib/assessment.ts";
 import { sendNotification } from "../../src/server/mail.ts";
 import { checkLegalIdentity } from "./legal-identity.mjs";
+import { checkLegalFields } from "./legal-fields.mjs";
 import { checkInboxStatus } from "./inbox-status.mjs";
 import { checkFollowUp } from "./follow-up.mjs";
 import { checkRetention } from "./retention.mjs";
@@ -122,7 +123,7 @@ try {
     status(page, 200);
     const html = await page.text();
     assert.match(html, /Draft for review/);
-    assert.match(html, /Stepan Vasylevskyi - InfoTech Consulting/);
+    assert.match(html, /Stepan Vasylevskyi - IT Consulting/);
     assert.match(html, /Get Automated/);
     assert.match(html, /https:\/\/get-automated\.ai/);
     assert.doesNotMatch(html, /\[(LEGAL_NAME|TRADING_NAME|WEBSITE_URL)\]/);
@@ -176,7 +177,12 @@ try {
   const originalPrivacy = legalOriginals.find(
     (page) => page.slug === "privacy",
   );
+  const legalDetails = (
+    await db().query("SELECT * FROM legal_details WHERE singleton")
+  ).rows[0];
   const legalUpdate = {
+    values: legalDetails.data,
+    valuesVersion: legalDetails.version,
     title: "Reviewed privacy draft",
     content:
       "## Contact details\n\nA draft with enough detail for a meaningful review. ".repeat(
@@ -284,6 +290,7 @@ try {
         page.slug,
       ],
     );
+  checks += await checkLegalFields({ call, db });
   const ownerId = (await db().query("SELECT user_id FROM site_owner")).rows[0]
     .user_id;
   await db().query("DELETE FROM site_owner");
