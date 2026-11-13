@@ -58,6 +58,8 @@ First merge the PR and run the existing **Deploy website to Hetzner** workflow, 
 
 In Owner area → Settings → Agency identity, set the agency name to **Get Automated** and **Public email** to `hello@get-automated.ai`. This changes public contact links and the Reply-To saved with **new** receipts. Existing receipt snapshots retain their original wording and Reply-To. The login account address and notification recipient are independent; changing either of these mail settings does not change your admin login.
 
+To change the admin login email, use **Settings → Admin account**. Enter the new address twice and your current password, then sign in again with the new address. This changes only the login identifier and signs out all sessions; it does not reconfigure Gmail, Resend, `NOTIFICATION_EMAIL`, or the public email above.
+
 Review pending/failed messages and remove only known disposable test enquiries through the owner inbox. Eligible old messages can be retried using the new provider; do not enable live delivery with a test backlog you do not intend to send. The read-only preflight below reports counts. Also review the editable Privacy Policy before live use: replace the test-only mail description/provider placeholder with the actual Resend and Google Workspace arrangements, including relevant processing and retention details. This release does not overwrite owner-edited legal pages.
 
 Use a short maintenance window to stop both senders while changing the server file:

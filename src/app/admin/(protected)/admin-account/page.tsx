@@ -1,5 +1,6 @@
 import { requireOwner } from "@/server/owner-page";
 import { PasswordForm } from "@/components/password-form";
+import { EmailForm } from "@/components/email-form";
 
 export default async function AdminAccount() {
   const session = await requireOwner();
@@ -12,7 +13,10 @@ export default async function AdminAccount() {
           <p>Signed in as {session.user.email}</p>
         </div>
       </div>
-      <PasswordForm />
+      <div className="account-settings">
+        <EmailForm currentEmail={session.user.email} />
+        <PasswordForm />
+      </div>
     </>
   );
 }

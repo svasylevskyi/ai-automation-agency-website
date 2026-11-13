@@ -461,12 +461,22 @@
 }
 
 .login-form > .button,
+.email-form > .button,
 .password-form > .button,
 .follow-up-form > .button {
   margin-top: 24px;
 }
+.account-settings {
+  display: grid;
+  gap: 28px;
+}
+.email-form,
 .password-form {
   max-width: 620px;
+}
+.email-form > p {
+  margin-top: 12px;
+  overflow-wrap: anywhere;
 }
 
 .legal-editors {
