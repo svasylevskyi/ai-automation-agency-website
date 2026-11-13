@@ -17,6 +17,7 @@ import { listenForEnquiryWebhooks } from "./enquiry-webhook.mjs";
 import { checkServiceEnquiry } from "./service-enquiry.mjs";
 import { checkResendMail } from "./resend-mail.mjs";
 import { checkApprovedReplies } from "./approved-replies.mjs";
+import { checkAdminEmail } from "./admin-email.mjs";
 
 if (!new URL(process.env.DATABASE_URL).pathname.endsWith("_test"))
   throw new Error(
@@ -750,6 +751,7 @@ try {
     );
   }
   status(await call("/api/admin/password", "POST", passwordInput, true), 429);
+  checks += await checkAdminEmail({ base, email, password: nextPassword, db });
   await provisionOwner(email, randomBytes(30).toString("base64url"), true);
   status(await call("/api/admin/settings", "PUT", newSettings, true), 401);
   await db().query("UPDATE site_settings SET data=$1,version=version+1", [

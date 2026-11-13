@@ -150,3 +150,20 @@ export const passwordChangeSchema = z
     message: "Choose a different password.",
     path: ["newPassword"],
   });
+
+const accountEmail = z.string().trim().toLowerCase().pipe(z.email().max(254));
+export const emailChangeSchema = z
+  .object({
+    currentEmail: accountEmail,
+    newEmail: accountEmail,
+    confirmEmail: accountEmail,
+    currentPassword: z.string().min(1).max(128),
+  })
+  .refine((value) => value.newEmail === value.confirmEmail, {
+    message: "The new email addresses must match.",
+    path: ["confirmEmail"],
+  })
+  .refine((value) => value.newEmail !== value.currentEmail, {
+    message: "Choose a different email address.",
+    path: ["newEmail"],
+  });
