@@ -1446,18 +1446,12 @@ button.text-link {
   gap: 12px 24px;
   margin-top: 12px;
 }
-.legal-links a,
-.legal-header nav a {
+.legal-links a {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
   text-decoration: underline;
   text-underline-offset: 4px;
-}
-.legal-header nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px 24px;
 }
 .legal-document {
   max-width: 900px;
@@ -1527,9 +1521,6 @@ button.text-link {
   text-decoration: underline;
 }
 @media (max-width: 520px) {
-  .legal-header {
-    flex-wrap: wrap;
-  }
   .legal-document {
     padding-block: 40px 56px;
   }
@@ -1539,7 +1530,7 @@ button.text-link {
   }
 }
 @media print {
-  .legal-header,
+  .site-header:has(~ .legal-document),
   .legal-contents,
   .legal-document ~ .site-footer {
     display: none;

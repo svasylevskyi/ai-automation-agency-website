@@ -4,8 +4,7 @@ import { env } from "@/server/env";
 import { getLegalPage } from "@/server/legal";
 import { legalPages, legalPlaceholders, type LegalSlug } from "@/lib/legal";
 import { parseLegalContent } from "@/lib/legal-content";
-import { Brand } from "./brand";
-import { HomeLink } from "./home-link";
+import { SiteHeader } from "./site-header";
 import { SiteFooter } from "./site-footer";
 import { LegalContent } from "./legal-content";
 
@@ -37,15 +36,7 @@ export async function LegalDocument({ slug }: { slug: LegalSlug }) {
       <a className="skip" href="#legal-main">
         Skip to content
       </a>
-      <header className="site-header">
-        <div className="wrap header-inner legal-header">
-          <Brand brand={brand} />
-          <nav aria-label="Website navigation">
-            <HomeLink>Home</HomeLink>
-            <a href="/#contact">Get in touch</a>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader brand={brand} />
       <main className="wrap legal-document" id="legal-main" tabIndex={-1}>
         <h1>{page.title}</h1>
         <p className="legal-date">
